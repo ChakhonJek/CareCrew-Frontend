@@ -1,0 +1,115 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:myjek/Approve/ApprovedInfo.dart';
+import 'package:myjek/Approve_function/EditTask.dart';
+import 'package:myjek/Dashboard/Models.dart';
+import 'dart:convert';
+
+class ApproveTaskPage extends StatefulWidget {
+  final String personelID;
+  const ApproveTaskPage({super.key, required this.personelID});
+
+  @override
+  State<ApproveTaskPage> createState() => _ApproveTaskPageState();
+}
+
+class _ApproveTaskPageState extends State<ApproveTaskPage> {
+  List<TaskModel> tasks = [];
+
+  Future<List<TaskModel>> getData() async {
+    final res = await http.get(Uri.parse('https://api.lcadv.online/api/Tasks'));
+
+    if (res.statusCode == 200) {
+      List resJson = jsonDecode(utf8.decode(res.bodyBytes));
+      return resJson.map((data) => TaskModel.fromJson(data)).toList();
+    } else {
+      return [];
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadTasks();
+  }
+
+  Future<void> loadTasks() async {
+    try {
+      List<TaskModel> loadTask = await getData();
+      tasks = loadTask;
+      setState(() {});
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Widget taskList(TaskModel task) {
+    final status = getStatus(task);
+
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: CircleAvatar(backgroundColor: status.color, radius: 8),
+        title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 5),
+            Text("จำนวนคนที่ต้องการ: ${task.peopleNeeded}"),
+            Text("มอบหมายงานโดย: ${task.assignedBy}"),
+            SizedBox(height: 5),
+            Chip(
+              avatar: Icon(Icons.circle, size: 14, color: status.color),
+              label: Text("${task.status}"),
+              backgroundColor: status.color.withOpacity(0.1),
+            ),
+          ],
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ApprovedInfopage(task: task, personelID: widget.personelID),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      appBar: AppBar(
+        title: Text("รายการงาน"),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: loadTasks,
+        child: tasks.isEmpty
+            ? ListView(
+                physics: AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: 300),
+                  Center(child: CircularProgressIndicator()),
+                ],
+              )
+            : ListView.builder(
+                physics: AlwaysScrollableScrollPhysics(),
+                itemCount: tasks.length,
+                itemBuilder: (context, i) {
+                  return taskList(tasks[i]);
+                },
+              ),
+      ),
+    );
+  }
+}
