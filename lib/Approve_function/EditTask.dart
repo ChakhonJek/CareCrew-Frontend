@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Approve/ApprovePage.dart';
+import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/Dashboard/Models.dart';
 
 class Edittask extends StatefulWidget {
@@ -83,7 +84,9 @@ class _EdittaskState extends State<Edittask> {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => ApprovePage(personelID: widget.personelID)),
+                    MaterialPageRoute(
+                      builder: (_) => ApproveTaskPage(personelID: widget.personelID),
+                    ),
                     (route) => false,
                   );
                 },
@@ -103,6 +106,14 @@ class _EdittaskState extends State<Edittask> {
     setState(() {});
   }
 
+  Future<void> deleteTask() async {
+    final res = await http.post(
+      Uri.parse('https://api.lcadv.online/api/removetask'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'task_id': widget.task.taskId}),
+    );
+  }
+
   void showError(String msg) {
     showDialog(
       context: context,
@@ -117,7 +128,52 @@ class _EdittaskState extends State<Edittask> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("แก้ไขงาน")),
+      appBar: AppBar(
+        title: Text("แก้ไขงาน"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            tooltip: "ลบงาน",
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text("ยืนยันการลบ"),
+                  content: Text("คุณต้องการลบงานนี้จริงหรือไม่?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text("ยกเลิก"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text("ลบ", style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                await deleteTask();
+                if (mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")));
+                }
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ApproveTaskPage(personelID: widget.personelID),
+                    ),
+                    (route) => false,
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(

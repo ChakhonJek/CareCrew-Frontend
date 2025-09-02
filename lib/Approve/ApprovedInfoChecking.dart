@@ -1,20 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:myjek/Approve_function/EditTask.dart';
+import 'package:myjek/Dashboard/After_Accept.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ApprovedInfopage extends StatefulWidget {
+class ApprovedCheckpage extends StatefulWidget {
   final TaskModel task;
   final String personelID;
-  ApprovedInfopage({super.key, required this.task, required this.personelID});
+  ApprovedCheckpage({super.key, required this.task, required this.personelID});
 
   @override
-  State<ApprovedInfopage> createState() => _ApprovedInfopageState();
+  State<ApprovedCheckpage> createState() => _ApprovedCheckpageState();
 }
 
-class _ApprovedInfopageState extends State<ApprovedInfopage> {
+class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
   List<TaskParticipants> workerData = [];
   bool isLoading = false;
   bool alreadyAcc = false;
@@ -208,25 +208,7 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
   Widget build(BuildContext context) {
     final task = widget.task;
     return Scaffold(
-      appBar: AppBar(title: Text("รายละเอียดงาน"), actions: [
-        if (task.status != "เสร็จสิ้น" && task.status != "รอการตรวจสอบ")
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => Edittask(personelID: widget.personelID, task: task,),
-                ),
-              );
-
-              if (result == true) {
-                await workerGetData();
-                setState(() {});
-              }
-            },
-          ),
-      ],),
+      appBar: AppBar(title: Text("รายละเอียดงาน")),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -268,6 +250,47 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
             ),
 
             SizedBox(height: 24),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Center(
+                  child: ActionWorkButtons(
+                    isFull: isFull,
+                    hasAccepted: alreadyAcc,
+                    hasSubmitted: hasSubmitted,
+                    taskStatus: task.status,
+                    onAccept: () async {
+                      await AcceptWork();
+                      await workerGetData();
+                      await submitStatus();
+                      setState(() {});
+                    },
+                    onCancel: () async {
+                      await cancelWork();
+                      await workerGetData();
+                      await submitStatus();
+                      setState(() {});
+                    },
+                    onGoToSubmit: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              AfterAccept(personelID: widget.personelID, task: widget.task),
+                        ),
+                      );
+                      await submitStatus();
+                    },
+                    onUnSubmit: () async {
+                      await unSendReport();
+                      await submitStatus();
+                      setState(() {});
+                    },
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ],
         ),
       ),
@@ -305,5 +328,109 @@ class SeeWorkerButton extends StatelessWidget {
       ),
       child: Text("รายชื่อผู้เข้าร่วม", style: TextStyle(color: Colors.white)),
     );
+  }
+}
+
+class ActionWorkButtons extends StatelessWidget {
+  final bool isFull;
+  final bool hasAccepted;
+  final bool hasSubmitted;
+  final String taskStatus;
+  final VoidCallback onAccept;
+  final VoidCallback onCancel;
+  final VoidCallback onGoToSubmit;
+  final VoidCallback onUnSubmit;
+
+  const ActionWorkButtons({
+    super.key,
+    required this.isFull,
+    required this.hasAccepted,
+    required this.hasSubmitted,
+    required this.taskStatus,
+    required this.onAccept,
+    required this.onCancel,
+    required this.onGoToSubmit,
+    required this.onUnSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (taskStatus == 'เสร็จสิ้น') return SizedBox.shrink();
+
+    List<Widget> buttons = [];
+
+    if (hasAccepted) {
+      if (!hasSubmitted) {
+        buttons.add(
+          ElevatedButton(
+            onPressed: onGoToSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ส่งงาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+
+        buttons.add(SizedBox(height: 20));
+        buttons.add(
+          ElevatedButton(
+            onPressed: onCancel,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ยกเลิกงาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+      } else {
+        buttons.add(
+          ElevatedButton(
+            onPressed: onUnSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ยกเลิกส่งงาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+
+        buttons.add(SizedBox(height: 20));
+        buttons.add(
+          ElevatedButton(
+            onPressed: null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ยกเลิกงาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+      }
+    } else if (isFull) {
+      buttons.add(
+        ElevatedButton(
+          onPressed: null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.grey,
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          ),
+          child: Text("เต็มแล้ว", style: TextStyle(color: Colors.white)),
+        ),
+      );
+    } else {
+      buttons.add(
+        ElevatedButton(
+          onPressed: onAccept,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          ),
+          child: Text("ยอมรับงาน", style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
+    return Column(children: buttons);
   }
 }

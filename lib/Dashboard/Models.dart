@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myjek/Approve/ApprovePage.dart';
 import 'package:myjek/Approve/ApprovedTask.dart';
+import 'package:myjek/Approve_function/AddmoreTask.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'package:myjek/Dashboard/Profile.dart';
 import 'package:myjek/Login/LoginPage.dart';
@@ -145,10 +146,10 @@ class _AppDrawerState extends State<AppDrawer> {
   @override
   void initState() {
     super.initState();
-    _loadRole();
+    loadRole();
   }
 
-  Future<void> _loadRole() async {
+  Future<void> loadRole() async {
     final prefs = await SharedPreferences.getInstance();
     final savedRole = prefs.getString('role') ?? "0";
     setState(() {
@@ -168,25 +169,22 @@ class _AppDrawerState extends State<AppDrawer> {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.blue),
-            child: Text(
-              "เมนู",
-              style: const TextStyle(color: Colors.white, fontSize: 20),
-            ),
+            child: Text("เมนู", style: const TextStyle(color: Colors.white, fontSize: 20)),
           ),
 
           if (role != "1") ...[
             ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text("หน้าหลัก"),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DashboardPage(personelID: widget.personnelId.toString()),
-                ),
-              );
-            },
-          ),
+              leading: const Icon(Icons.home),
+              title: const Text("หน้าหลัก"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardPage(personelID: widget.personnelId.toString()),
+                  ),
+                );
+              },
+            ),
 
             ListTile(
               leading: const Icon(Icons.work),
@@ -217,17 +215,17 @@ class _AppDrawerState extends State<AppDrawer> {
 
           if (role == "1") ...[
             ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text("หน้าหลัก"),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ApproveTaskPage(personelID: widget.personnelId.toString()),
-                ),
-              );
-            },
-          ),
+              leading: const Icon(Icons.work),
+              title: const Text("หน้าหลัก"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ApproveTaskPage(personelID: widget.personnelId.toString()),
+                  ),
+                );
+              },
+            ),
 
             ListTile(
               leading: const Icon(Icons.check_circle),
@@ -249,25 +247,25 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ReportPage(personelID: widget.personnelId.toString()),
+                    builder: (context) => AddTaskPage(personnelId: widget.personnelId),
                   ),
                 );
               },
             ),
           ],
 
-            ListTile(
-              leading: const Icon(Icons.account_circle),
-              title: const Text("โปรไฟล์"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfilePage(personnelId: widget.personnelId.toString()),
-                  ),
-                );
-              },
-            ),
+          ListTile(
+            leading: const Icon(Icons.account_circle),
+            title: const Text("โปรไฟล์"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(personnelId: widget.personnelId.toString()),
+                ),
+              );
+            },
+          ),
 
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
