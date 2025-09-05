@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myjek/Dashboard/After_Accept.dart';
+import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'Models.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -208,7 +209,19 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     final task = widget.task;
     return Scaffold(
-      appBar: AppBar(title: Text("รายละเอียดงาน")),
+      appBar: AppBar(
+        title: Text("รายละเอียดงาน"),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardPage(personelID: widget.personelID)),
+              (route) => false,
+            );
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(

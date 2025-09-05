@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:myjek/Approve_function/EditTask.dart';
+import 'package:myjek/Approve/ApprovedInfoChecking.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'dart:convert';
 
@@ -13,7 +13,8 @@ class ApprovePage extends StatefulWidget {
 }
 
 class _ApprovePageState extends State<ApprovePage> {
-  List<TaskModel> tasks = [];
+  List<TaskModel> task = [];
+  bool isLoading = true;
 
   Future<List<TaskModel>> getData() async {
     final res = await http.get(Uri.parse('https://api.lcadv.online/api/Tasks'));
@@ -33,13 +34,19 @@ class _ApprovePageState extends State<ApprovePage> {
   }
 
   Future<void> loadTasks() async {
+    isLoading = true;
+    setState(() {});
+
     try {
       List<TaskModel> loadTask = await getData();
-      tasks = loadTask;
+      task = (loadTask.where((task) => task.status == "รอการตรวจสอบ").toList());
       setState(() {});
     } catch (e) {
       print("Error: $e");
     }
+
+    isLoading = false;
+    setState(() {});
   }
 
   Widget taskList(TaskModel task) {
@@ -52,52 +59,28 @@ class _ApprovePageState extends State<ApprovePage> {
       child: ListTile(
         leading: CircleAvatar(backgroundColor: status.color, radius: 8),
         title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: Text('${status.dateStatus}: ${status.date}'),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (task.status != "รอการตรวจสอบ" && task.status != "เสร็จสิ้น") ...[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Edittask(task: task, personelID: widget.personelID),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[400],
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  textStyle: TextStyle(fontSize: 12),
-                ),
-                child: Text("แก้ไข"),
-              ),
-            ],
-            SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: () {
-                // รอทำหน้าตรวจสอบ
-
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => ),
-                // );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[300],
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                textStyle: TextStyle(fontSize: 12),
-              ),
-              child: Text("ตรวจสอบ"),
+            SizedBox(height: 5),
+            Text("จำนวนคนที่ต้องการ: ${task.peopleNeeded}"),
+            Text("มอบหมายงานโดย: ${task.assignedBy}"),
+            SizedBox(height: 5),
+            Chip(
+              avatar: Icon(Icons.circle, size: 14, color: status.color),
+              label: Text("${task.status}"),
+              backgroundColor: status.color.withOpacity(0.1),
             ),
           ],
         ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ApprovedCheckpage(task: task, personelID: widget.personelID),
+            ),
+          );
+        },
       ),
     );
   }
@@ -105,7 +88,7 @@ class _ApprovePageState extends State<ApprovePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("ตรวจสอบงาน"),
         leading: Builder(
@@ -117,7 +100,7 @@ class _ApprovePageState extends State<ApprovePage> {
       ),
       body: RefreshIndicator(
         onRefresh: loadTasks,
-        child: tasks.isEmpty
+        child: isLoading
             ? ListView(
                 physics: AlwaysScrollableScrollPhysics(),
                 children: [
@@ -125,11 +108,24 @@ class _ApprovePageState extends State<ApprovePage> {
                   Center(child: CircularProgressIndicator()),
                 ],
               )
+            : task.isEmpty
+            ? ListView(
+                physics: AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: 300),
+                  Center(
+                    child: Text(
+                      "ยังไม่มีงานให้ตรวจสอบ",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
+                ],
+              )
             : ListView.builder(
                 physics: AlwaysScrollableScrollPhysics(),
-                itemCount: tasks.length,
+                itemCount: task.length,
                 itemBuilder: (context, i) {
-                  return taskList(tasks[i]);
+                  return taskList(task[i]);
                 },
               ),
       ),

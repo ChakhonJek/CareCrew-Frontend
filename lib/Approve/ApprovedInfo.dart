@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:myjek/Approve/After_ApprovedTask.dart';
 import 'package:myjek/Approve_function/EditTask.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'package:http/http.dart' as http;
@@ -208,25 +209,28 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
   Widget build(BuildContext context) {
     final task = widget.task;
     return Scaffold(
-      appBar: AppBar(title: Text("รายละเอียดงาน"), actions: [
-        if (task.status != "เสร็จสิ้น" && task.status != "รอการตรวจสอบ")
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => Edittask(personelID: widget.personelID, task: task,),
-                ),
-              );
+      appBar: AppBar(
+        title: Text("รายละเอียดงาน"),
+        actions: [
+          if (task.status != "เสร็จสิ้น" && task.status != "รอการตรวจสอบ")
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Edittask(personelID: widget.personelID, task: task),
+                  ),
+                );
 
-              if (result == true) {
-                await workerGetData();
-                setState(() {});
-              }
-            },
-          ),
-      ],),
+                if (result == true) {
+                  await workerGetData();
+                  setState(() {});
+                }
+              },
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -263,6 +267,42 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                   detail('รายละเอียด:', task.detail),
                   SizedBox(height: 16),
                   Center(child: SeeWorkerButton(onPressed: showWorker)),
+                  if (task.status == "รอการตรวจสอบ") ...[
+                    SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task,)),
+                          );
+                        },
+                        child: Text("ตรวจสอบงาน", style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                  if (task.status == "เสร็จสิ้น") ...[
+                    SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task,)),
+                          );
+                        },
+                        child: Text("หลักฐานการทำงาน", style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

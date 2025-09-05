@@ -1,6 +1,3 @@
-// อาจจะแก้ UI ในอนาคต
-// ทำแจ้งเตือนในอนาคต
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Dashboard/Info.dart';

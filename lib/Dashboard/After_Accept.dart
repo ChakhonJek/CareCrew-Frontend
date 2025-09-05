@@ -206,11 +206,12 @@ class _AfterAccept extends State<AfterAccept> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                     builder: (context) => Info(task: widget.task, personelID: widget.personelID),
                   ),
+                  (Route<dynamic> route) => false,
                 );
               },
               child: Text("ตกลง"),

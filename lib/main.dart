@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/fcm_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myjek/Login/HomePage.dart';
-import 'package:myjek/Approve/ApprovePage.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 
 void main() async {
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 
     if (personelID != null && role != null) {
       if (role == "1") {
-        return ApprovePage(personelID: personelID,);
+        return ApproveTaskPage(personelID: personelID,);
       } else {
         return DashboardPage(personelID: personelID);
       }
