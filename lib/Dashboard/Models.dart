@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:myjek/Approve/ApprovePage.dart';
 import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/Approve_function/AddmoreTask.dart';
+import 'package:myjek/Approve_function/TaskFromReport.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'package:myjek/Dashboard/Profile.dart';
 import 'package:myjek/Login/LoginPage.dart';
@@ -42,6 +43,35 @@ class TaskModel {
       assignedBy = json['assigned_by'],
       status = json['status'],
       created_at = json['created_at'];
+}
+
+class ReportModel {
+  final int reportId;
+  final String title;
+  final int personnelid;
+  final String detail;
+  final String location;
+  final DateTime createdAt;
+  final List<dynamic> file;
+
+  ReportModel({
+    required this.reportId,
+    required this.title,
+    required this.personnelid,
+    required this.detail,
+    required this.location,
+    required this.createdAt,
+    required this.file,
+  });
+
+  ReportModel.fromJson(Map<String, dynamic> json)
+    : reportId = json['report_id'] ?? 0,
+      title = json['title'] ?? "",
+      personnelid = json['personnel_id'] ?? 0,
+      detail = json['detail'] ?? "",
+      location = json['location'] ?? "",
+      createdAt = DateTime.parse(json['created_at'] ?? ""),
+      file = (json['files'] ?? []);
 }
 
 class TaskParticipants {
@@ -221,7 +251,8 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ApproveTaskPage(personelID: widget.personnelId.toString()),
+                    builder: (context) =>
+                        ApproveTaskPage(personelID: widget.personnelId.toString()),
                   ),
                 );
               },
@@ -248,6 +279,19 @@ class _AppDrawerState extends State<AppDrawer> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddTaskPage(personnelId: widget.personnelId),
+                  ),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.warning),
+              title: const Text("ปัญหา"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Taskfromreport(personnelId: widget.personnelId),
                   ),
                 );
               },

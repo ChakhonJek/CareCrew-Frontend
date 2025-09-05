@@ -177,6 +177,35 @@ class _EdittaskState extends State<Edittask> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
+            DropdownButtonFormField<String>(
+              value: typeID ?? "0",
+              decoration: InputDecoration(labelText: "ประเภทงาน"),
+              items: [
+                DropdownMenuItem(value: "0", child: Text("--ใช้ค่าเดิม--")),
+                ...taskType.map<DropdownMenuItem<String>>((item) {
+                  return DropdownMenuItem<String>(
+                    value: item['task_type_id'].toString(),
+                    child: Text(item['name']),
+                  );
+                }).toList(),
+              ],
+              onChanged: (value) => setState(() => typeID = value),
+            ),
+            SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: priorityID ?? "0",
+              decoration: InputDecoration(labelText: "ความสำคัญ"),
+              items: [
+                DropdownMenuItem(value: "0", child: Text("--ใช้ค่าเดิม--")),
+                ...priority.map<DropdownMenuItem<String>>((item) {
+                  return DropdownMenuItem<String>(
+                    value: item['priority_type_id'].toString(),
+                    child: Text(item['name']),
+                  );
+                }).toList(),
+              ],
+              onChanged: (value) => setState(() => priorityID = value),
+            ),
             TextFormField(
               initialValue: title,
               decoration: InputDecoration(labelText: "ชื่องาน"),
@@ -202,35 +231,6 @@ class _EdittaskState extends State<Edittask> {
               onChanged: (val) => setState(() => peopleNeed = val),
             ),
             SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: typeID ?? "0",
-              hint: Text("ประเภทงาน"),
-              items: [
-                DropdownMenuItem(value: "0", child: Text("--ใช้ค่าเดิม--")),
-                ...taskType.map<DropdownMenuItem<String>>((item) {
-                  return DropdownMenuItem<String>(
-                    value: item['task_type_id'].toString(),
-                    child: Text(item['name']),
-                  );
-                }).toList(),
-              ],
-              onChanged: (value) => setState(() => typeID = value),
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: priorityID ?? "0",
-              hint: Text("ความสำคัญ"),
-              items: [
-                DropdownMenuItem(value: "0", child: Text("--ใช้ค่าเดิม--")),
-                ...priority.map<DropdownMenuItem<String>>((item) {
-                  return DropdownMenuItem<String>(
-                    value: item['priority_type_id'].toString(),
-                    child: Text(item['name']),
-                  );
-                }).toList(),
-              ],
-              onChanged: (value) => setState(() => priorityID = value),
-            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {

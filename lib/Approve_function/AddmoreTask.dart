@@ -5,8 +5,17 @@ import 'package:myjek/Approve/ApprovedTask.dart';
 
 class AddTaskPage extends StatefulWidget {
   final int personnelId;
+  final String? prefillTitle;
+  final String? prefillDetail;
+  final String? prefillLocation;
 
-  const AddTaskPage({super.key, required this.personnelId});
+  const AddTaskPage({
+    super.key,
+    required this.personnelId,
+    this.prefillTitle,
+    this.prefillDetail,
+    this.prefillLocation,
+  });
 
   @override
   State<AddTaskPage> createState() => _AddTaskPageState();
@@ -30,6 +39,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void initState() {
     super.initState();
     loadDropdownData();
+
+    titleController.text = widget.prefillTitle ?? "";
+    detailController.text = widget.prefillDetail ?? "";
+    locationController.text = widget.prefillLocation ?? "";
   }
 
   Future<void> loadDropdownData() async {

@@ -48,10 +48,9 @@ class _ReportPageState extends State<ReportPage> {
     var request = http.MultipartRequest('POST', uri);
 
     request.fields['title'] = title;
-    request.fields['email'] = email;
+    request.fields['personnel_id'] = widget.personelID;
     request.fields['detail'] = detail;
     request.fields['location'] = location;
-
   for (var imageFile in selectedImages) {
       String Typee = '';
       if (imageFile.path.endsWith('.png')) {
@@ -165,7 +164,7 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   void whileSubmit() async {
-    if (detail.isEmpty || email.isEmpty || location.isEmpty || title.isEmpty) {
+    if (detail.isEmpty || location.isEmpty || title.isEmpty) {
       showError("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
@@ -182,7 +181,11 @@ class _ReportPageState extends State<ReportPage> {
           content: Text("ข้อมูลถูกส่งเรียบร้อยแล้ว"),
           actions: [
             TextButton(
-              onPressed: (){},
+              onPressed: (){Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => ReportPage(personelID: widget.personelID)),
+            (route) => false,
+          );},
               child: Text("ตกลง"),
             ),
           ],
@@ -217,7 +220,6 @@ class _ReportPageState extends State<ReportPage> {
             ),
             SizedBox(height: 20),
             TitleField(onChanged: (val) => title = val),
-            EmailField(onChanged: (val) => email = val),
             LocationField(onChanged: (val) => location = val),
             DetailField(onChanged: (val) => detail = val),
             imagePickerWidget(),
@@ -227,42 +229,6 @@ class _ReportPageState extends State<ReportPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class EmailField extends StatelessWidget {
-  final Function(String) onChanged;
-  const EmailField({super.key, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("อีเมล:", style: TextStyle(fontSize: 18)),
-          SizedBox(height: 5),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[400]!),
-            ),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "กรอกอีเมล",
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              ),
-              onChanged: onChanged,
-            ),
-          ),
-        ],
       ),
     );
   }
