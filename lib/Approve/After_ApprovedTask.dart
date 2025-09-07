@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/Dashboard/Models.dart';
 
 class CheckTaskPage extends StatelessWidget {
+  final int personnelId;
   final int taskId;
   final TaskModel taskmodel;
 
-  CheckTaskPage({super.key, required this.taskId, required this.taskmodel});
+  CheckTaskPage({super.key, required this.taskId, required this.taskmodel, required this.personnelId});
 
   Future<Map<String, dynamic>> fetchTaskDetails() async {
     final res = await http.get(Uri.parse("https://api.lcadv.online/api/gettaskevidence/$taskId"));
@@ -42,7 +44,13 @@ class CheckTaskPage extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ApproveTaskPage(personelID: personnelId.toString()),
+                    ),
+                    (route) => false,
+                  );
                 },
                 child: const Text("ตกลง"),
               ),

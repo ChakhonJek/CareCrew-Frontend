@@ -278,7 +278,7 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task,)),
+                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task, personnelId: int.parse(widget.personelID),)),
                           );
                         },
                         child: Text("ตรวจสอบงาน", style: TextStyle(color: Colors.white)),
@@ -296,7 +296,7 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task,)),
+                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task, personnelId: int.parse(widget.personelID),)),
                           );
                         },
                         child: Text("หลักฐานการทำงาน", style: TextStyle(color: Colors.white)),

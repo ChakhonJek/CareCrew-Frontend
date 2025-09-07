@@ -134,7 +134,7 @@ class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel:task),
+                            builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel:task, personnelId: int.parse(widget.personelID)),
                           ),
                         );
                       },
