@@ -81,7 +81,7 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("รายการงาน"),
         leading: Builder(
@@ -98,7 +98,12 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
                 physics: AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: 300),
-                  Center(child: CircularProgressIndicator()),
+                  Center(
+                    child: Text(
+                      "ยังไม่มีงานให้ตรวจสอบ",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
                 ],
               )
             : ListView.builder(
