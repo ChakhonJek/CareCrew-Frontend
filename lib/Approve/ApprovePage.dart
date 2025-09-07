@@ -105,7 +105,12 @@ class _ApprovePageState extends State<ApprovePage> {
                 physics: AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: 300),
-                  Center(child: CircularProgressIndicator()),
+                  Center(
+                    child: Text(
+                      "ยังไม่มีงานให้ตรวจสอบ",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
                 ],
               )
             : task.isEmpty
