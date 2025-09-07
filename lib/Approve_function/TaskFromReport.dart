@@ -52,7 +52,9 @@ class _TaskfromreportState extends State<Taskfromreport> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ReportInfopage(reportModel: report, personnelid: widget.personnelId)),
+            MaterialPageRoute(
+              builder: (_) => ReportInfopage(reportModel: report, personnelid: widget.personnelId),
+            ),
           );
         },
       ),
@@ -74,7 +76,12 @@ class _TaskfromreportState extends State<Taskfromreport> {
             } else if (snapshot.hasError) {
               return Center(child: Text("เกิดข้อผิดพลาด: ${snapshot.error}"));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("ยังไม่มีรายงาน"));
+              return const Center(
+                child: Text(
+                  "ยังไม่มีรายงาน",
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+              );
             }
 
             final reports = snapshot.data!;
