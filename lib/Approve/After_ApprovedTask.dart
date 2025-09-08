@@ -9,15 +9,20 @@ class CheckTaskPage extends StatelessWidget {
   final int taskId;
   final TaskModel taskmodel;
 
-  CheckTaskPage({super.key, required this.taskId, required this.taskmodel, required this.personnelId});
+  CheckTaskPage({
+    super.key,
+    required this.taskId,
+    required this.taskmodel,
+    required this.personnelId,
+  });
 
-  Future<Map<String, dynamic>> fetchTaskDetails() async {
+  Future<List<Map<String, dynamic>>> fetchTaskDetails() async {
     final res = await http.get(Uri.parse("https://api.lcadv.online/api/gettaskevidence/$taskId"));
 
     if (res.statusCode == 200) {
       final List<dynamic> data = jsonDecode(res.body);
       if (data.isNotEmpty) {
-        return data[0] as Map<String, dynamic>;
+        return data.cast<Map<String, dynamic>>();
       } else {
         throw Exception("ไม่พบข้อมูลงาน");
       }
@@ -87,7 +92,7 @@ class CheckTaskPage extends StatelessWidget {
       appBar: AppBar(title: const Text("ตรวจสอบงาน")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<Map<String, dynamic>>(
+        child: FutureBuilder<List<Map<String, dynamic>>>(
           future: fetchTaskDetails(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -96,8 +101,13 @@ class CheckTaskPage extends StatelessWidget {
               return Center(child: Text("เกิดข้อผิดพลาด: ${snapshot.error}"));
             }
 
-            final task = snapshot.data!;
-            final List<dynamic> files = task['files'] ?? [];
+            final List<Map<String, dynamic>> taskList = snapshot.data!;
+
+            final List<String> allFiles = taskList
+                .expand((item) => List<String>.from(item["files"]))
+                .toList();
+
+            final task = taskList.first;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +121,7 @@ class CheckTaskPage extends StatelessWidget {
                 const Divider(height: 32),
                 Text("📷 หลักฐานที่ส่งมา", style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
-                files.isEmpty
+                allFiles.isEmpty
                     ? const Center(child: Text("ยังไม่มีรูปแนบ"))
                     : GridView.builder(
                         shrinkWrap: true,
@@ -121,7 +131,7 @@ class CheckTaskPage extends StatelessWidget {
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
                         ),
-                        itemCount: files.length,
+                        itemCount: allFiles.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
                             onTap: () {
@@ -130,7 +140,7 @@ class CheckTaskPage extends StatelessWidget {
                                 builder: (_) => Dialog(
                                   child: InteractiveViewer(
                                     child: Image.network(
-                                      files[index],
+                                      allFiles[index],
                                       fit: BoxFit.contain,
                                       errorBuilder: (context, error, stackTrace) =>
                                           const Text("โหลดรูปไม่สำเร็จ"),
@@ -142,7 +152,7 @@ class CheckTaskPage extends StatelessWidget {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
-                                files[index],
+                                allFiles[index],
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
                                     const Icon(Icons.broken_image),
