@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/Approve_function/AddmoreTask.dart';
+import 'package:myjek/Approve_function/TaskFromReport.dart';
 import 'package:myjek/Dashboard/Models.dart';
 
 class ReportInfopage extends StatelessWidget {
@@ -12,10 +13,57 @@ class ReportInfopage extends StatelessWidget {
   final int personnelid;
   const ReportInfopage({super.key, required this.reportModel, required this.personnelid});
 
+  Future<void> deleteReport() async {
+    final res = await http.post(
+      Uri.parse('https://api.lcadv.online/api/removereport'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'report_id': reportModel.reportId}),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("รายละเอียดงาน")),
+      appBar: AppBar(
+        title: Text("รายละเอียดงาน"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            tooltip: "ลบงาน",
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text("ยืนยันการลบ"),
+                  content: Text("คุณต้องการลบรายงานนี้จริงหรือไม่?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text("ยกเลิก"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text("ลบ", style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                await deleteReport();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")));
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => Taskfromreport(personnelId: personnelid)),
+                  (route) => false,
+                );
+              }
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -97,16 +145,16 @@ class ReportInfopage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AddTaskPage(
-                            personnelId: personnelid,
-                            prefillTitle: reportModel.title,
-                            prefillDetail: reportModel.detail,
-                            prefillLocation: reportModel.location,
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AddTaskPage(
+                              personnelId: personnelid,
+                              prefillTitle: reportModel.title,
+                              prefillDetail: reportModel.detail,
+                              prefillLocation: reportModel.location,
+                            ),
                           ),
-                        ),
-                      );
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,

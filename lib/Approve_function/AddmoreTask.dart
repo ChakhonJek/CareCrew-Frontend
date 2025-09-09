@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Approve/ApprovedTask.dart';
+import 'package:myjek/Dashboard/Models.dart';
 
 class AddTaskPage extends StatefulWidget {
   final int personnelId;
@@ -111,6 +112,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text("เพิ่มงาน")),
+      drawer: AppDrawer(personnelId: widget.personnelId),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

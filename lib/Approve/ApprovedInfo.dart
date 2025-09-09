@@ -251,7 +251,7 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'เวลาลงงาน ${getFormatDate(task.created_at)}',
+                        'ลงงานเมื่อ ${getFormatDate(task.created_at)}',
                         style: TextStyle(fontSize: 12),
                       ),
                       Text(task.status, style: TextStyle(fontWeight: FontWeight.bold)),

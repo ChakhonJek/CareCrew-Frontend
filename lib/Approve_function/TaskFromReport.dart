@@ -15,6 +15,11 @@ class Taskfromreport extends StatefulWidget {
 }
 
 class _TaskfromreportState extends State<Taskfromreport> {
+  void initState() {
+    super.initState();
+    fetchTaskDetails();
+  }
+
   Future<List<ReportModel>> fetchTaskDetails() async {
     final res = await http.get(Uri.parse("https://api.lcadv.online/api/greport"));
     if (res.statusCode == 200) {
@@ -23,6 +28,10 @@ class _TaskfromreportState extends State<Taskfromreport> {
     } else {
       throw Exception("โหลดข้อมูลไม่สำเร็จ");
     }
+  }
+
+  Future<void> refreshData() async {
+    setState(() {});
   }
 
   Widget reportCard(BuildContext context, ReportModel report) {
@@ -66,21 +75,39 @@ class _TaskfromreportState extends State<Taskfromreport> {
     return Scaffold(
       appBar: AppBar(title: const Text("ตรวจสอบรายงาน")),
       drawer: AppDrawer(personnelId: widget.personnelId),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: RefreshIndicator(
+        onRefresh: refreshData,
         child: FutureBuilder<List<ReportModel>>(
           future: fetchTaskDetails(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return ListView(
+                children: const [
+                  SizedBox(height: 400, child: Center(child: CircularProgressIndicator())),
+                ],
+              );
             } else if (snapshot.hasError) {
-              return Center(child: Text("เกิดข้อผิดพลาด: ${snapshot.error}"));
+              return ListView(
+                children: [
+                  SizedBox(
+                    height: 400,
+                    child: Center(child: Text("เกิดข้อผิดพลาด: ${snapshot.error}")),
+                  ),
+                ],
+              );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text(
-                  "ยังไม่มีรายงาน",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
+              return ListView(
+                children: const [
+                  SizedBox(
+                    height: 400,
+                    child: Center(
+                      child: Text(
+                        "ยังไม่มีรายงาน",
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                ],
               );
             }
 
