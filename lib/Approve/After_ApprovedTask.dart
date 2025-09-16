@@ -89,7 +89,9 @@ class CheckTaskPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("ตรวจสอบงาน")),
+      appBar: AppBar(
+        title: Text(taskmodel.status == "รอการตรวจสอบ" ? "ตรวจสอบ" : "หลักฐานการทำงาน"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<List<Map<String, dynamic>>>(

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:myjek/Approve/After_ApprovedTask.dart';
 import 'package:myjek/Dashboard/After_Accept.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'Models.dart';
@@ -268,6 +269,8 @@ class _InfoState extends State<Info> {
               children: [
                 Center(
                   child: ActionWorkButtons(
+                    task: task,
+                    personelID: int.parse(widget.personelID),
                     isFull: isFull,
                     hasAccepted: alreadyAcc,
                     hasSubmitted: hasSubmitted,
@@ -345,6 +348,8 @@ class SeeWorkerButton extends StatelessWidget {
 }
 
 class ActionWorkButtons extends StatelessWidget {
+  final TaskModel task;
+  final int personelID;
   final bool isFull;
   final bool hasAccepted;
   final bool hasSubmitted;
@@ -364,13 +369,36 @@ class ActionWorkButtons extends StatelessWidget {
     required this.onCancel,
     required this.onGoToSubmit,
     required this.onUnSubmit,
+    required this.task,
+    required this.personelID,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (taskStatus == 'เสร็จสิ้น') return SizedBox.shrink();
-
     List<Widget> buttons = [];
+
+    if (taskStatus == 'เสร็จสิ้น') {
+      buttons.add(
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    CheckTaskPage(taskId: task.taskId, taskmodel: task, personnelId: personelID),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+          ),
+          child: Text("แสดงหลักฐานการทำงาน", style: TextStyle(color: Colors.white)),
+        ),
+      );
+
+      return Column(children: buttons);
+    }
 
     if (hasAccepted) {
       if (!hasSubmitted) {
