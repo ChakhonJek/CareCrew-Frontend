@@ -67,7 +67,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   Future<void> addTask() async {
-    final response = await http.post(
+    final res = await http.post(
       Uri.parse("https://api.lcadv.online/api/addtask"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
@@ -81,7 +81,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (res.statusCode == 200) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("เพิ่มงานสำเร็จ")));
         await Future.delayed(const Duration(seconds: 1));
@@ -94,13 +94,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
       }
     } else {
       setState(() {
-        result = "Status: ${response.statusCode}\nBody: ${response.body}";
+        result = "Status: ${res.statusCode}\nBody: ${res.body}";
       });
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("เกิดข้อผิดพลาดในการเพิ่มงาน")));
-      }
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("เกิดข้อผิดพลาดในการเพิ่มงาน")));
+          setState(() {
+            result = "";
+          });
+        }
+      });
     }
   }
 
@@ -163,7 +168,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: addTask, child: const Text("เพิ่มงาน")),
+            ElevatedButton(
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                addTask();
+              },
+              child: const Text("เพิ่มงาน"),
+            ),
             const SizedBox(height: 20),
             Text(result),
           ],
