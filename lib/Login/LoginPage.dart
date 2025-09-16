@@ -56,14 +56,16 @@ class _PageState extends State<LoginPage> {
         Session.role = role;
 
         if (role == "1") {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => ApproveTaskPage(personelID: personelID)),
+            (Route<dynamic> route) => false,
           );
         } else {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => DashboardPage(personelID: personelID)),
+            (Route<dynamic> route) => false,
           );
         }
       } else {
