@@ -17,26 +17,14 @@ class ApprovedInfopage extends StatefulWidget {
 
 class _ApprovedInfopageState extends State<ApprovedInfopage> {
   List<TaskParticipants> workerData = [];
-  bool isLoading = false;
-  bool alreadyAcc = false;
-  bool isFull = false;
-  bool hasSubmitted = false;
 
   @override
   void initState() {
     super.initState();
     workerGetData();
-    submitStatus();
-  }
-
-  void updateTaskStatus(String newStatus) {
-    setState(() {
-      widget.task.status = newStatus;
-    });
   }
 
   Future<void> workerGetData() async {
-    isLoading = true;
     setState(() {});
 
     final res = await http.get(Uri.parse('https://api.lcadv.online/api/lrubTasks'));
@@ -52,10 +40,9 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
         final List<dynamic> resJson = decoded;
         final allWorker = resJson.map((data) => TaskParticipants.fromJson(data)).toList();
         workerData = allWorker.where((worker) => worker.taskId == widget.task.taskId).toList();
-
-        final taskWorker = workerData.firstWhere((worker) => worker.taskId == widget.task.taskId);
-
-        alreadyAcc = workerData.any((worker) {
+        workerData.firstWhere((worker) => worker.taskId == widget.task.taskId);
+        
+        workerData.any((worker) {
           final List<String> idList = worker.personnel_id
               .split(',')
               .map((id) => id.trim())
@@ -63,8 +50,6 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
 
           return idList.contains(widget.personelID);
         });
-
-        isFull = taskWorker.personnelCount >= widget.task.peopleNeeded;
       } catch (e) {
         print("เกิดข้อผิดพลาดในการแปลงข้อมูล: $e");
       }
@@ -73,92 +58,8 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
       throw Exception('เกิดข้อผิดพลาด');
     }
 
-    isLoading = false;
+    false;
     setState(() {});
-  }
-
-  Future<void> submitStatus() async {
-    try {
-      final url = Uri.parse(
-        'https://api.lcadv.online/api/persubmittasksbor/${widget.personelID}/${widget.task.taskId}',
-      );
-
-      final res = await http.get(url);
-
-      if (res.statusCode == 200) {
-        final decoded = jsonDecode(utf8.decode(res.bodyBytes));
-        print("Submit API response: $decoded");
-        hasSubmitted = decoded['submit'] ?? false;
-        setState(() {});
-      } else {
-        print('ไม่สามารถโหลด submit status ได้: ${res.statusCode}');
-        hasSubmitted = false;
-        setState(() {});
-      }
-    } catch (e) {
-      print("เกิดข้อผิดพลาดในการโหลด submit status: $e");
-      hasSubmitted = false;
-      setState(() {});
-    }
-  }
-
-  Future<void> unSendReport() async {
-    final res = await http.post(
-      Uri.parse('https://api.lcadv.online/api/yoklerksongtask'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'personnel_id': int.parse(widget.personelID),
-        'task_id': widget.task.taskId,
-      }),
-    );
-
-    if (res.statusCode == 200) {
-      print("ยกเลิกส่งงานเรียบร้อย");
-      setState(() {});
-    } else {
-      print("เกิดข้อผิดพลาด: ${res.statusCode}");
-    }
-  }
-
-  Future<void> AcceptWork() async {
-    final res = await http.post(
-      Uri.parse('https://api.lcadv.online/api/lrubtask'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'personnel_id': int.parse(widget.personelID),
-        'task_id': widget.task.taskId,
-      }),
-    );
-    if (res.statusCode == 200) {
-      print("ok");
-      await workerGetData();
-      updateTaskStatus("อยู่ระหว่างดำเนินการ");
-    } else {
-      print("เกิดข้อผิดพลาด: ${res.statusCode}");
-    }
-  }
-
-  Future<void> cancelWork() async {
-    final res = await http.post(
-      Uri.parse('https://api.lcadv.online/api/yoklerktask'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'personnel_id': int.parse(widget.personelID),
-        'task_id': widget.task.taskId,
-      }),
-    );
-    if (res.statusCode == 200) {
-      print("ok");
-
-      alreadyAcc = false;
-      isFull = false;
-      workerData = [];
-      await workerGetData();
-      updateTaskStatus("ยังไม่ดำเนินการ");
-      setState(() {});
-    } else {
-      print("เกิดข้อผิดพลาด: ${res.statusCode}");
-    }
   }
 
   void showWorker() async {
@@ -278,7 +179,13 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task, personnelId: int.parse(widget.personelID),)),
+                            MaterialPageRoute(
+                              builder: (_) => CheckTaskPage(
+                                taskId: task.taskId,
+                                taskmodel: task,
+                                personnelId: int.parse(widget.personelID),
+                              ),
+                            ),
                           );
                         },
                         child: Text("ตรวจสอบงาน", style: TextStyle(color: Colors.white)),
@@ -296,7 +203,13 @@ class _ApprovedInfopageState extends State<ApprovedInfopage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel: task, personnelId: int.parse(widget.personelID),)),
+                            MaterialPageRoute(
+                              builder: (_) => CheckTaskPage(
+                                taskId: task.taskId,
+                                taskmodel: task,
+                                personnelId: int.parse(widget.personelID),
+                              ),
+                            ),
                           );
                         },
                         child: Text("หลักฐานการทำงาน", style: TextStyle(color: Colors.white)),
