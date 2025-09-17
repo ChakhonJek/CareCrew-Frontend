@@ -152,7 +152,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
             ),
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: "ชื่อเรื่อง"),
+              decoration: const InputDecoration(labelText: "ชื่องาน"),
             ),
             TextField(
               controller: detailController,
