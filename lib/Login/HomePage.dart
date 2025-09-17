@@ -36,7 +36,6 @@ class HomePage extends StatelessWidget {
             SizedBox(height: 40),
             ToLogin(),
             SizedBox(height: 20),
-            // ToMoreProblem(),
           ],
         ),
       ),
