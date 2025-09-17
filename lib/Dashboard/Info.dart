@@ -80,11 +80,8 @@ class _InfoState extends State<Info> {
 
   Future<void> submitStatus() async {
     try {
-      final url = Uri.parse(
-        'https://api.lcadv.online/api/persubmittasksbor/${widget.personelID}/${widget.task.taskId}',
-      );
-
-      final res = await http.get(url);
+      final res = await http.get(Uri.parse(
+        'https://api.lcadv.online/api/persubmittasksbor/${widget.personelID}/${widget.task.taskId}'));
 
       if (res.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(res.bodyBytes));
