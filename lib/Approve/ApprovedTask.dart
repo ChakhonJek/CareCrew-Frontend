@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:myjek/Approve/ApprovedInfo.dart';
+import 'package:myjek/Approve/ApprovedInfoChecking.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'dart:convert';
 
@@ -70,7 +70,7 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ApprovedInfopage(task: task, personelID: widget.personelID),
+              builder: (_) => ApprovedCheckpage(task: task, personelID: widget.personelID),
             ),
           );
         },
