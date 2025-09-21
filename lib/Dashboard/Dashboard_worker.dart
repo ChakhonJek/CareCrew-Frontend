@@ -137,7 +137,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
-        title: Text("รายการงาน"),
+        title: Text("รายการงานทั้งหมด"),
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),

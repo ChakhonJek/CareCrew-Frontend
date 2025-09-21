@@ -74,7 +74,7 @@ class _TaskfromreportState extends State<Taskfromreport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("ตรวจสอบรายงาน")),
+      appBar: AppBar(title: const Text("รายการแจ้งเหตุสร้างงาน")),
       drawer: AppDrawer(personnelId: widget.personnelId),
       body: RefreshIndicator(
         onRefresh: refreshData,

@@ -203,7 +203,7 @@ class _ReportPageState extends State<ReportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("แจ้งปัญหา"),
+        title: Text("แจ้งเหตุสร้างงาน"),
         centerTitle: true,
         automaticallyImplyLeading: true,
       ),

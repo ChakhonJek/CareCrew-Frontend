@@ -113,7 +113,7 @@ class _MyWorkTask extends State<MyWorkTask> {
     return Scaffold(
       drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
       appBar: AppBar(
-        title: Text("งานของฉัน"),
+        title: Text("งานที่ฉันมีส่วนร่วม"),
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),

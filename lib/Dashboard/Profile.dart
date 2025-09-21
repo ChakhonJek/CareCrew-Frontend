@@ -1,7 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:myjek/Dashboard/Models.dart';
+
 
 class ProfilePage extends StatefulWidget {
   final String personnelId;
@@ -14,7 +17,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? profileData;
-  bool Loading = true;
+  bool loading = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -23,60 +27,130 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> getProfile() async {
+    setState(() => loading = true);
     try {
-      final res = await http.get(Uri.parse('https://api.lcadv.online/api/personnels/${widget.personnelId}'));
+      final res = await http.get(Uri.parse(
+          'https://api.lcadv.online/api/personnels/${widget.personnelId}'));
       if (res.statusCode == 200) {
-        final resJson = json.decode(utf8.decode(res.bodyBytes));
-        profileData = resJson;
-        Loading = false;
-        setState(() {});
+        profileData = json.decode(res.body);
       } else {
-        throw Exception('เกิดข้อผิดพลาด');
+        profileData = null;
       }
     } catch (e) {
-      Loading = false;
-      setState(() {});
+      profileData = null;
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
+  Future<void> pickAndUploadImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile == null) return;
+
+    final uri = Uri.parse(
+        'https://api.lcadv.online/api/personnels/${widget.personnelId}/profile');
+    final request = http.MultipartRequest('PUT', uri);
+
+    request.files.add(await http.MultipartFile.fromPath(
+      'img',
+      pickedFile.path,
+    ));
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('อัปโหลดสำเร็จ')));
+      getProfile();
+    } else {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('อัปโหลดล้มเหลว')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('โปรไฟล์')),
-        drawer: AppDrawer(personnelId: int.parse(widget.personnelId)),
-        body: Loading
-            ? const Center(child: CircularProgressIndicator())
-            : profileData == null
-            ? const Center(child: Text('ไม่สามารถโหลดข้อมูลได้'))
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(child: Icon(Icons.account_circle, size: 100, color: Colors.grey)),
-                    const SizedBox(height: 20),
-                    Text(
-                      'หมายเลขผู้ใช้: ${profileData!['personnel_id']}',
-                      style: const TextStyle(fontSize: 18),
+    return Scaffold(
+      appBar: AppBar(title: const Text('โปรไฟล์')),
+      drawer: AppDrawer(personnelId: int.parse(widget.personnelId)),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : profileData == null
+          ? const Center(child: Text('ไม่สามารถโหลดข้อมูลได้'))
+          : Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: profileData!['file'] != null ? NetworkImage('${profileData!['file']}') : null,
+                    child: profileData!['file'] == null ? const Icon(Icons.account_circle, size: 120, color: Colors.grey) : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.camera_alt),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (_) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.photo),
+                                title: const Text('จากแกลเลอรี่'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  pickAndUploadImage(
+                                      ImageSource.gallery);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.camera),
+                                title: const Text('ถ่ายรูปใหม่'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  pickAndUploadImage(
+                                      ImageSource.camera);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'ชื่อ: ${profileData!['first_name']} ${profileData!['last_name']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'เบอร์โทร: ${profileData!['phone']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'ตำแหน่ง: ${profileData!['role_name']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-      );
-    }
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'หมายเลขผู้ใช้: ${profileData!['personnel_id']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'ชื่อ: ${profileData!['first_name']} ${profileData!['last_name']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'เบอร์โทร: ${profileData!['phone']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'ตำแหน่ง: ${profileData!['role_name']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+}
