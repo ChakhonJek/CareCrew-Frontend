@@ -62,6 +62,7 @@ class _EdittaskState extends State<Edittask> {
         Uri.parse('https://api.lcadv.online/api/edittask'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
+          "personnel_id": widget.personelID,
           'task_id': widget.task.taskId,
           'task_type_id': int.parse(typeID ?? ""),
           'title': title,
@@ -109,7 +110,9 @@ class _EdittaskState extends State<Edittask> {
     final res = await http.post(
       Uri.parse('https://api.lcadv.online/api/removetask'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'task_id': widget.task.taskId}),
+      body: jsonEncode({
+        "personnel_id": widget.personelID,
+        "task_id": widget.task.taskId}),
     );
   }
 

@@ -71,6 +71,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
       Uri.parse("https://api.lcadv.online/api/addtask"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
+        "personnel_id": widget.personnelId,
         "task_type_id": selectedTaskType,
         "priority_type_id": selectedPriorityType,
         "title": titleController.text,

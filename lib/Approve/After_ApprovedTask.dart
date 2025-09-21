@@ -36,7 +36,9 @@ class CheckTaskPage extends StatelessWidget {
       final res = await http.post(
         Uri.parse("https://api.lcadv.online/api/tasksuccess"),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'task_id': taskId}),
+        body: jsonEncode({
+          "personnel_id": personnelId,
+          "task_id": taskId}),
       );
 
       if (res.statusCode == 200) {

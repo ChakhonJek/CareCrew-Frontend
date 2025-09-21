@@ -16,7 +16,9 @@ class ReportInfopage extends StatelessWidget {
     final res = await http.post(
       Uri.parse('https://api.lcadv.online/api/removereport'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'report_id': reportModel.reportId}),
+      body: jsonEncode({
+        "personnel_id": personnelid,
+        "report_id": reportModel.reportId}),
     );
   }
 
