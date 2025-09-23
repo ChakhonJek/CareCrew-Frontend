@@ -10,7 +10,13 @@ import 'package:myjek/Dashboard/Models.dart';
 class AfterAccept extends StatefulWidget {
   final String personelID;
   final TaskModel task;
-  const AfterAccept({super.key, required this.personelID, required this.task});
+  final bool isEditMode;
+  const AfterAccept({
+    super.key,
+    required this.personelID,
+    required this.task,
+    this.isEditMode = false,
+  });
 
   @override
   State<AfterAccept> createState() => _AfterAccept();
@@ -19,14 +25,49 @@ class AfterAccept extends StatefulWidget {
 class _AfterAccept extends State<AfterAccept> {
   bool loading = false;
 
-  List<File> selectedImages = [];
+  List<File> newImages = [];
+  List<String> existingImages = [];
+
   final picker = ImagePicker();
+
+  @override
+void initState() {
+  super.initState();
+  if (widget.isEditMode) {
+    loadExistingEvidence();
+  }
+}
+
+Future<void> loadExistingEvidence() async {
+  setState(() => loading = true);
+  try {
+    final evidences = await fetchTaskEvidence(widget.task.taskId);
+    setState(() {
+      existingImages = evidences.expand((e) => e.files).toList();
+    });
+  } catch (e) {
+    print("โหลดหลักฐานเดิมไม่สำเร็จ: $e");
+  } finally {
+    setState(() => loading = false);
+  }
+}
+
+Future<List<TaskEvidence>> fetchTaskEvidence(int taskId) async {
+  final res = await http.get(Uri.parse("https://api.lcadv.online/api/gettaskevidence/$taskId"));
+  if (res.statusCode == 200) {
+    final List<dynamic> data = jsonDecode(res.body);
+    return data.map((e) => TaskEvidence.fromJson(e)).toList();
+  } else {
+    throw Exception("โหลดข้อมูลงานไม่สำเร็จ: ${res.statusCode}");
+  }
+}
+
 
   Future<void> pickFromCamera() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
     if (pickedFile != null) {
       setState(() {
-        selectedImages.add(File(pickedFile.path));
+        newImages.add(File(pickedFile.path));
       });
     }
   }
@@ -35,7 +76,7 @@ class _AfterAccept extends State<AfterAccept> {
     final pickedFiles = await picker.pickMultiImage(imageQuality: 70);
     if (pickedFiles.isNotEmpty) {
       setState(() {
-        selectedImages.addAll(pickedFiles.map((e) => File(e.path)));
+        newImages.addAll(pickedFiles.map((e) => File(e.path)));
       });
     }
   }
@@ -44,30 +85,28 @@ class _AfterAccept extends State<AfterAccept> {
     var uri = Uri.parse('https://api.lcadv.online/api/songtask');
 
     var request = http.MultipartRequest('POST', uri);
-
     request.fields['personnel_id'] = widget.personelID;
     request.fields['task_id'] = widget.task.taskId.toString();
 
-    for (var imageFile in selectedImages) {
-      String Typee = '';
-      if (imageFile.path.endsWith('.png')) {
-        Typee = 'image/png';
-      } else if (imageFile.path.endsWith('.jpg') || imageFile.path.endsWith('.jpeg')) {
-        Typee = 'image/jpeg';
-      } else if (imageFile.path.endsWith('.webp')) {
-        Typee = 'image/webp';
-      } else {
-        Typee = 'application/octet-stream';
-      }
+    for (var imageFile in newImages) {
+      String typee = '';
+      if (imageFile.path.endsWith('.png'))
+        typee = 'image/png';
+      else if (imageFile.path.endsWith('.jpg') || imageFile.path.endsWith('.jpeg'))
+        typee = 'image/jpeg';
+      else
+        typee = 'application/octet-stream';
 
       request.files.add(
         await http.MultipartFile.fromPath(
           'img',
           imageFile.path,
-          contentType: MediaType(Typee.split('/')[0], Typee.split('/')[1]),
+          contentType: MediaType(typee.split('/')[0], typee.split('/')[1]),
         ),
       );
     }
+
+    request.fields['existing'] = jsonEncode(existingImages);
 
     var streamedResponse = await request.send();
     var responseBody = await streamedResponse.stream.bytesToString();
@@ -79,18 +118,72 @@ class _AfterAccept extends State<AfterAccept> {
       throw Exception("รูปแบบข้อมูลที่ได้ไม่ใช่ JSON: $responseBody");
     }
 
-    String message = resData['message'] ?? "ไม่พบข้อความตอบกลับ";
-
     if (streamedResponse.statusCode == 200 && resData['success'] == true) {
-      print('ส่งข้อมูลสำเร็จ: $message');
+      print('ส่งข้อมูลสำเร็จ: ${resData['message']}');
       return;
     } else {
-      print('ส่งข้อมูลล้มเหลว: $message');
-      throw Exception(message);
+      throw Exception('ส่งข้อมูลล้มเหลว: ${resData['message']}');
     }
   }
 
   Widget imagePickerWidget() {
+    List<Widget> widgets = [];
+
+    widgets.addAll(
+      existingImages.map((url) {
+        return Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(url, height: 100, width: 100, fit: BoxFit.cover),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    existingImages.remove(url);
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                  child: Icon(Icons.close, color: Colors.white, size: 18),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+    widgets.addAll(
+      newImages.map((file) {
+        return Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(file, height: 100, width: 100, fit: BoxFit.cover),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    newImages.remove(file);
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                  child: Icon(Icons.close, color: Colors.white, size: 18),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Column(
@@ -146,110 +239,94 @@ class _AfterAccept extends State<AfterAccept> {
             ],
           ),
           SizedBox(height: 10),
-          if (selectedImages.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: selectedImages.map((img) {
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(img, height: 100, width: 100, fit: BoxFit.cover),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedImages.remove(img);
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                          child: Icon(Icons.close, color: Colors.white, size: 18),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
+          if (widgets.isNotEmpty) Wrap(spacing: 8, runSpacing: 8, children: widgets),
         ],
       ),
     );
   }
 
-  void showError(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ข้อมูลไม่ถูกต้อง'),
-        content: Text(message),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('ตกลง'))],
-      ),
-    );
-  }
-
-  void whileSubmit() async {
-    loading = true;
-    setState(() {});
-
-    try {
-      await sendReport();
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("ส่งสำเร็จ"),
-          content: Text("ข้อมูลถูกส่งเรียบร้อยแล้ว"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Info(task: widget.task, personelID: widget.personelID),
-                  ),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              child: Text("ตกลง"),
-            ),
-          ],
-        ),
-      );
-    } catch (e) {
-      showError(e.toString());
-    }
-
-    loading = false;
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("ส่งงาน"), centerTitle: true, automaticallyImplyLeading: true),
-      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      appBar: AppBar(title: Text(widget.isEditMode ? "แก้ไขหลักฐาน" : "ส่งงาน"), centerTitle: true),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              height: 2,
-              width: double.infinity,
-              color: Colors.black,
-            ),
             SizedBox(height: 20),
             imagePickerWidget(),
             SizedBox(height: 50),
             Center(
-              child: SendButton(onPressed: whileSubmit, loading: loading),
+              child: SendButton(
+                loading: loading,
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("ยืนยันการส่งงาน"),
+                      content: Text("คุณแน่ใจหรือไม่ว่าต้องการส่งงานนี้?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text("ยกเลิก"),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text("ส่งงาน"),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm != true) return;
+
+                  setState(() => loading = true);
+
+                  try {
+                    await sendReport();
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("สำเร็จ"),
+                        content: Text("ข้อมูลถูกส่งเรียบร้อยแล้ว"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      Info(task: widget.task, personelID: widget.personelID),
+                                ),
+                                (route) => false,
+                              );
+                            },
+                            child: Text("ตกลง"),
+                          ),
+                        ],
+                      ),
+                    );
+                  } catch (e) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text("ข้อผิดพลาด"),
+                        content: Text(e.toString()),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context), child: Text("ตกลง")),
+                        ],
+                      ),
+                    );
+                  } finally {
+                    setState(() => loading = false);
+                  }
+                },
+              ),
             ),
+
             SizedBox(height: 20),
             Center(child: BackButton()),
+            SizedBox(height: 20),
           ],
         ),
       ),

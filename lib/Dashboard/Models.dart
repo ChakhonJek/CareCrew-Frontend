@@ -103,6 +103,37 @@ class TaskParticipants {
       personnel_id = json['personnel_ids'];
 }
 
+class TaskEvidence {
+  final String assignedBy;
+  final int assignmentId;
+  final String detail;
+  final List<String> files;
+  final int taskId;
+  final String title;
+  final String uploadedAt;
+
+  TaskEvidence({
+    required this.assignedBy,
+    required this.assignmentId,
+    required this.detail,
+    required this.files,
+    required this.taskId,
+    required this.title,
+    required this.uploadedAt,
+  });
+
+  TaskEvidence.fromJson(Map<String, dynamic> json)
+      : assignedBy = json['assigned_by'] ?? '',
+        assignmentId = json['assignment_id'] ?? 0,
+        detail = json['detail'] ?? '',
+        files = List<String>.from(json['files'] ?? []),
+        taskId = json['task_id'] ?? 0,
+        title = json['title'] ?? '',
+        uploadedAt = json['uploaded_at'] ?? '';
+}
+
+
+
 class Session {
   static String role = "";
 }

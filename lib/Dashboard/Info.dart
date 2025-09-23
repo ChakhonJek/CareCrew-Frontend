@@ -80,8 +80,11 @@ class _InfoState extends State<Info> {
 
   Future<void> submitStatus() async {
     try {
-      final res = await http.get(Uri.parse(
-        'https://api.lcadv.online/api/persubmittasksbor/${widget.personelID}/${widget.task.taskId}'));
+      final res = await http.get(
+        Uri.parse(
+          'https://api.lcadv.online/api/persubmittasksbor/${widget.personelID}/${widget.task.taskId}',
+        ),
+      );
 
       if (res.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(res.bodyBytes));
@@ -252,12 +255,14 @@ class _InfoState extends State<Info> {
                   detail('ผู้มอบหมายงาน:', task.assignedBy),
                   detail('ประเภทงาน:', task.typeName),
                   detail('สถานที่:', task.location),
-                  detail('จำนวนบุคคลที่ต้องการ:', '${task.personnel_count}/${task.peopleNeeded.toString()}คน'),
+                  detail(
+                    'จำนวนบุคคลที่ต้องการ:',
+                    '${task.personnel_count}/${task.peopleNeeded.toString()}คน',
+                  ),
                   detail('กำหนดส่งงาน:', getFormatDate(task.task_due_at)),
                   detail('รายละเอียด:', task.detail),
 
-                  if (task.status == "ต้องการแก้ไข")
-                    detail('หมายเหตุ:', task.nosuccess_detail!),
+                  if (task.status == "ต้องการแก้ไข") detail('หมายเหตุ:', task.nosuccess_detail!),
 
                   SizedBox(height: 16),
                   Center(child: SeeWorkerButton(onPressed: showWorker)),
@@ -278,29 +283,97 @@ class _InfoState extends State<Info> {
                     hasSubmitted: hasSubmitted,
                     taskStatus: task.status,
                     onAccept: () async {
-                      await AcceptWork();
-                      await workerGetData();
-                      await submitStatus();
-                      setState(() {});
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('ยืนยัน'),
+                          content: Text('คุณแน่ใจที่จะรับงานนี้?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text('ยกเลิก'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text('ตกลง'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await AcceptWork();
+                      }
                     },
                     onCancel: () async {
-                      await cancelWork();
-                      await workerGetData();
-                      await submitStatus();
-                      setState(() {});
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('ยืนยัน'),
+                          content: Text('คุณแน่ใจที่จะยกเลิกงานนี้?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text('ยกเลิก'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text('ตกลง'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await cancelWork();
+                      }
                     },
                     onGoToSubmit: () async {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              AfterAccept(personelID: widget.personelID, task: widget.task),
+                          builder: (_) => AfterAccept(personelID: widget.personelID, task: task),
                         ),
                       );
                       await submitStatus();
+                      setState(() {});
                     },
                     onUnSubmit: () async {
-                      await unSendReport();
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('ยืนยัน'),
+                          content: Text('คุณแน่ใจที่จะยกเลิกการส่งงาน?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text('ยกเลิก'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text('ตกลง'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await unSendReport();
+                        await submitStatus();
+                        setState(() {});
+                      }
+                    },
+                    onViewEvidence: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AfterAccept(
+                            personelID: widget.personelID,
+                            task: task,
+                            isEditMode: true,
+                          ),
+                        ),
+                      );
                       await submitStatus();
                       setState(() {});
                     },
@@ -360,6 +433,7 @@ class ActionWorkButtons extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onGoToSubmit;
   final VoidCallback onUnSubmit;
+  final VoidCallback? onViewEvidence;
 
   const ActionWorkButtons({
     super.key,
@@ -373,6 +447,7 @@ class ActionWorkButtons extends StatelessWidget {
     required this.onUnSubmit,
     required this.task,
     required this.personelID,
+    this.onViewEvidence,
   });
 
   @override
@@ -403,7 +478,31 @@ class ActionWorkButtons extends StatelessWidget {
     }
 
     if (hasAccepted) {
-      if (!hasSubmitted) {
+      if (hasSubmitted) {
+        buttons.add(
+          ElevatedButton(
+            onPressed: onViewEvidence,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ดู / แก้ไขหลักฐาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+
+        buttons.add(SizedBox(height: 20));
+
+        buttons.add(
+          ElevatedButton(
+            onPressed: onUnSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            child: Text("ยกเลิกส่งงาน", style: TextStyle(color: Colors.white)),
+          ),
+        );
+      } else {
         buttons.add(
           ElevatedButton(
             onPressed: onGoToSubmit,
@@ -416,34 +515,12 @@ class ActionWorkButtons extends StatelessWidget {
         );
 
         buttons.add(SizedBox(height: 20));
+
         buttons.add(
           ElevatedButton(
             onPressed: onCancel,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-            ),
-            child: Text("ยกเลิกงาน", style: TextStyle(color: Colors.white)),
-          ),
-        );
-      } else {
-        buttons.add(
-          ElevatedButton(
-            onPressed: onUnSubmit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-            ),
-            child: Text("ยกเลิกส่งงาน", style: TextStyle(color: Colors.white)),
-          ),
-        );
-
-        buttons.add(SizedBox(height: 20));
-        buttons.add(
-          ElevatedButton(
-            onPressed: null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey,
               padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
             child: Text("ยกเลิกงาน", style: TextStyle(color: Colors.white)),
