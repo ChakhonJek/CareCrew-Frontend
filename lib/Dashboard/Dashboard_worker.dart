@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Dashboard/Info.dart';
+import 'package:myjek/NotificationWidget.dart';
 import 'Models.dart';
 import 'dart:convert';
 
@@ -79,7 +80,8 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         );
 
-        if ((task.status == "ยังไม่ดำเนินการ" || task.status == "อยู่ระหว่างดำเนินการ") && (task.personnel_count != task.peopleNeeded)){
+        if ((task.status == "ยังไม่ดำเนินการ" || task.status == "อยู่ระหว่างดำเนินการ") &&
+            (task.personnel_count != task.peopleNeeded)) {
           filteredTasks.add(task);
         }
       }
@@ -136,11 +138,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> statusOptions = [
-      "งานทั้งหมด",
-      "ยังไม่ดำเนินการ",
-      "อยู่ระหว่างดำเนินการ"
-    ];
+    final List<String> statusOptions = ["งานทั้งหมด", "ยังไม่ดำเนินการ", "อยู่ระหว่างดำเนินการ"];
 
     List<TaskModel> filteredTasks = selectedStatus == "งานทั้งหมด"
         ? tasks
@@ -150,6 +148,9 @@ class _DashboardPageState extends State<DashboardPage> {
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("รายการงานที่เข้าร่วมได้"),
+        // actions: [
+        //   NotificationBell(),
+        // ],
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -159,7 +160,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       body: Column(
         children: [
-          // ChoiceChip
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.all(8),
@@ -186,24 +186,24 @@ class _DashboardPageState extends State<DashboardPage> {
               onRefresh: mapTaskData,
               child: filteredTasks.isEmpty
                   ? ListView(
-                physics: AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: 300),
-                  Center(
-                    child: Text(
-                      "ไม่พบงานสถานะดังกล่าว",
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              )
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: 300),
+                        Center(
+                          child: Text(
+                            "ไม่พบงานสถานะดังกล่าว",
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    )
                   : ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: filteredTasks.length,
-                itemBuilder: (context, i) {
-                  return taskList(filteredTasks[i]);
-                },
-              ),
+                      physics: AlwaysScrollableScrollPhysics(),
+                      itemCount: filteredTasks.length,
+                      itemBuilder: (context, i) {
+                        return taskList(filteredTasks[i]);
+                      },
+                    ),
             ),
           ),
         ],
