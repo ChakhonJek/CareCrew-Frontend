@@ -36,9 +36,7 @@ class CheckTaskPage extends StatelessWidget {
       final res = await http.post(
         Uri.parse("https://api.lcadv.online/api/tasksuccess"),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "personnel_id": personnelId,
-          "task_id": taskId}),
+        body: jsonEncode({"personnel_id": personnelId, "task_id": taskId}),
       );
 
       if (res.statusCode == 200) {
@@ -170,8 +168,27 @@ class CheckTaskPage extends StatelessWidget {
                 if (taskmodel.status == "รอการตรวจสอบ")
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        alright(context);
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("ยืนยันอนุมัติงาน"),
+                            content: const Text("คุณต้องการอนุมัติเสร็จสิ้นงานนี้หรือไม่"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text("ยกเลิก"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text("ตกลง"),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          alright(context);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,

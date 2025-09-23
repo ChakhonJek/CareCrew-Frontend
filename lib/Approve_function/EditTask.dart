@@ -108,9 +108,7 @@ class _EdittaskState extends State<Edittask> {
           await Future.delayed(const Duration(seconds: 1));
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => ApproveTaskPage(personelID: widget.personelID),
-            ),
+            MaterialPageRoute(builder: (_) => ApproveTaskPage(personelID: widget.personelID)),
           );
         }
       } else {
@@ -128,7 +126,9 @@ class _EdittaskState extends State<Edittask> {
     final res = await http.post(
       Uri.parse('https://api.lcadv.online/api/removetask'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'task_id': widget.task.taskId}),
+      body: jsonEncode({
+        "personnel_id": int.parse(widget.personelID)
+      , "task_id": widget.task.taskId}),
     );
   }
 
@@ -175,9 +175,9 @@ class _EdittaskState extends State<Edittask> {
               if (confirm == true) {
                 await deleteTask();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")));
                 }
                 if (mounted) {
                   Navigator.pushAndRemoveUntil(
@@ -185,7 +185,7 @@ class _EdittaskState extends State<Edittask> {
                     MaterialPageRoute(
                       builder: (_) => ApproveTaskPage(personelID: widget.personelID),
                     ),
-                        (route) => false,
+                    (route) => false,
                   );
                 }
               }
@@ -331,13 +331,10 @@ class _EdittaskState extends State<Edittask> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange[400],
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -345,5 +342,4 @@ class _EdittaskState extends State<Edittask> {
       ),
     );
   }
-
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myjek/Approve/After_ApprovedTask.dart';
+import 'package:myjek/Approve_function/EditTask.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -86,7 +87,28 @@ class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
     final task = widget.task;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("รายละเอียดงาน")),
+      appBar: AppBar(
+        title: const Text("รายละเอียดงาน"),
+        actions: [
+          if (task.status != "เสร็จสิ้น" && task.status != "รอการตรวจสอบ")
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Edittask(personelID: widget.personelID, task: task),
+                  ),
+                );
+
+                if (result == true) {
+                  await loadWorkerData();
+                  setState(() {});
+                }
+              },
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -133,7 +155,11 @@ class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CheckTaskPage(taskId: task.taskId, taskmodel:task, personnelId: int.parse(widget.personelID)),
+                            builder: (_) => CheckTaskPage(
+                              taskId: task.taskId,
+                              taskmodel: task,
+                              personnelId: int.parse(widget.personelID),
+                            ),
                           ),
                         );
                       },
