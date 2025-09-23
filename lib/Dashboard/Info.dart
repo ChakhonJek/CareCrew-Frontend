@@ -252,8 +252,13 @@ class _InfoState extends State<Info> {
                   detail('ผู้มอบหมายงาน:', task.assignedBy),
                   detail('ประเภทงาน:', task.typeName),
                   detail('สถานที่:', task.location),
-                  detail('จำนวนบุคคลที่ต้องการ:', task.peopleNeeded.toString()),
+                  detail('จำนวนบุคคลที่ต้องการ:', '${task.personnel_count}/${task.peopleNeeded.toString()}คน'),
+                  detail('กำหนดส่งงาน:', getFormatDate(task.task_due_at)),
                   detail('รายละเอียด:', task.detail),
+
+                  if (task.status == "ต้องการแก้ไข")
+                    detail('หมายเหตุ:', task.nosuccess_detail!),
+
                   SizedBox(height: 16),
                   Center(child: SeeWorkerButton(onPressed: showWorker)),
                 ],

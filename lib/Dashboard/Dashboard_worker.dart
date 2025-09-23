@@ -14,6 +14,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   List<TaskModel> tasks = [];
+  String selectedStatus = "งานทั้งหมด";
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         );
 
-        if (task.status == "ยังไม่ดำเนินการ" || task.status == "อยู่ระหว่างดำเนินการ") {
+        if ((task.status == "ยังไม่ดำเนินการ" || task.status == "อยู่ระหว่างดำเนินการ") && (task.personnel_count != task.peopleNeeded)){
           filteredTasks.add(task);
         }
       }
@@ -110,8 +111,9 @@ class _DashboardPageState extends State<DashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 5),
-            Text("จำนวนคนที่ต้องการ: ${task.peopleNeeded}"),
+            Text("จำนวนคนที่ต้องการ: ${task.personnel_count}/${task.peopleNeeded}คน"),
             Text("มอบหมายงานโดย: ${task.assignedBy}"),
+            Text("กำหนดส่งงาน: ${getFormatDate(task.task_due_at)}"),
             SizedBox(height: 5),
             Chip(
               avatar: Icon(Icons.circle, size: 14, color: status.color),
@@ -134,10 +136,20 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> statusOptions = [
+      "งานทั้งหมด",
+      "ยังไม่ดำเนินการ",
+      "อยู่ระหว่างดำเนินการ"
+    ];
+
+    List<TaskModel> filteredTasks = selectedStatus == "งานทั้งหมด"
+        ? tasks
+        : tasks.where((t) => t.status == selectedStatus).toList();
+
     return Scaffold(
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
-        title: Text("รายการงานทั้งหมด"),
+        title: Text("รายการงานที่เข้าร่วมได้"),
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -145,29 +157,56 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: mapTaskData,
-        child: isLoading
-            ? ListView(
+      body: Column(
+        children: [
+          // ChoiceChip
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.all(8),
+            child: Row(
+              children: statusOptions.map((status) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(status),
+                    selected: selectedStatus == status,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedStatus = status;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: mapTaskData,
+              child: filteredTasks.isEmpty
+                  ? ListView(
                 physics: AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: 300),
-                  Center(child: CircularProgressIndicator()),
+                  Center(
+                    child: Text(
+                      "ไม่พบงานสถานะดังกล่าว",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
                 ],
               )
-            : tasks.isEmpty
-            ? ListView(
+                  : ListView.builder(
                 physics: AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: 300),
-                  Center(child: Text("ไม่มีงานในขณะนี้")),
-                ],
-              )
-            : ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: tasks.length,
-                itemBuilder: (context, i) => taskList(tasks[i]),
+                itemCount: filteredTasks.length,
+                itemBuilder: (context, i) {
+                  return taskList(filteredTasks[i]);
+                },
               ),
+            ),
+          ),
+        ],
       ),
     );
   }

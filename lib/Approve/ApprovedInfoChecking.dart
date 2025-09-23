@@ -132,8 +132,13 @@ class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
                   buildDetailRow('ผู้มอบหมายงาน:', task.assignedBy),
                   buildDetailRow('ประเภทงาน:', task.typeName),
                   buildDetailRow('สถานที่:', task.location),
-                  buildDetailRow('จำนวนบุคคลที่ต้องการ:', task.peopleNeeded.toString()),
+                  buildDetailRow('จำนวนบุคคลที่ต้องการ: ', '${task.personnel_count}/${task.peopleNeeded}คน'),
+                  buildDetailRow('กำหนดส่งงาน:', '${getFormatDate(task.task_due_at)}'),
                   buildDetailRow('รายละเอียด:', task.detail),
+
+                  if (task.status == "ต้องการแก้ไข")
+                    buildDetailRow('หมายเหตุ', task.nosuccess_detail!),
+
                   const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
@@ -149,27 +154,28 @@ class _ApprovedCheckpageState extends State<ApprovedCheckpage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CheckTaskPage(
-                              taskId: task.taskId,
-                              taskmodel: task,
-                              personnelId: int.parse(widget.personelID),
+                  if (task.status == "รอการตรวจสอบ" || task.status == "เสร็จสิ้น")
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CheckTaskPage(
+                                taskId: task.taskId,
+                                taskmodel: task,
+                                personnelId: int.parse(widget.personelID),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        ),
+                        child: const Text("ตรวจสอบงาน", style: TextStyle(color: Colors.white)),
                       ),
-                      child: const Text("ตรวจสอบงาน", style: TextStyle(color: Colors.white)),
                     ),
-                  ),
                 ],
               ),
             ),

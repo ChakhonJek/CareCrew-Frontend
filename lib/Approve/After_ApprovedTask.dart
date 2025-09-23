@@ -31,7 +31,89 @@ class CheckTaskPage extends StatelessWidget {
     }
   }
 
-  Future<void> alright(BuildContext context) async {
+  Future<void> nook(BuildContext context) async {
+    final TextEditingController detailController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("ไม่อนุมัติงาน"),
+        content: TextField(
+          controller: detailController,
+          maxLines: 2,
+          decoration: const InputDecoration(
+            labelText: "รายละเอียด",
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("ยกเลิก"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("ยืนยัน"),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      try {
+        final res = await http.post(
+          Uri.parse("https://api.lcadv.online/api/nosuccess"),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            "detail": detailController.text,
+            "personnel_id": personnelId,
+            "task_id": taskId,
+          }),
+        );
+
+        if (res.statusCode == 200) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text("สำเร็จ"),
+              content: const Text("ส่งไม่อนุมัติงานเรียบร้อยแล้ว"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ApproveTaskPage(personelID: personnelId.toString()),
+                      ),
+                          (route) => false,
+                    );
+                  },
+                  child: const Text("ตกลง"),
+                ),
+              ],
+            ),
+          );
+        } else {
+          throw Exception("โหลด API ไม่สำเร็จ: ${res.statusCode}");
+        }
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("เกิดข้อผิดพลาด"),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text("ปิด"))
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> ok(BuildContext context) async {
     try {
       final res = await http.post(
         Uri.parse("https://api.lcadv.online/api/tasksuccess"),
@@ -85,6 +167,8 @@ class CheckTaskPage extends StatelessWidget {
       );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -169,25 +253,31 @@ class CheckTaskPage extends StatelessWidget {
                   Center(
                     child: ElevatedButton(
                       onPressed: () async {
-                        final confirm = await showDialog<bool>(
+                        final confirm = await showDialog<String>(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text("ยืนยันอนุมัติงาน"),
                             content: const Text("คุณต้องการอนุมัติเสร็จสิ้นงานนี้หรือไม่"),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context, false),
+                                onPressed: () => Navigator.pop(context, "cancel"),
                                 child: const Text("ยกเลิก"),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: const Text("ตกลง"),
+                                onPressed: () => Navigator.pop(context, "nook"),
+                                child: const Text("ไม่อนุมัติ"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, "ok"),
+                                child: const Text("อนุมัติ"),
                               ),
                             ],
                           ),
                         );
-                        if (confirm == true) {
-                          alright(context);
+                        if (confirm == "ok") {
+                          ok(context);
+                        } else if (confirm == "nook") {
+                          nook(context);
                         }
                       },
                       style: ElevatedButton.styleFrom(

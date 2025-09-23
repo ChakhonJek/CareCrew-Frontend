@@ -20,6 +20,9 @@ class TaskModel {
   String assignedBy;
   String status;
   String created_at;
+  String task_due_at;
+  int personnel_count;
+  String? nosuccess_detail;
 
   TaskModel({
     required this.taskId,
@@ -31,6 +34,9 @@ class TaskModel {
     required this.assignedBy,
     required this.status,
     required this.created_at,
+    required this.task_due_at,
+    required this.personnel_count,
+    this.nosuccess_detail
   });
 
   TaskModel.fromJson(Map<String, dynamic> json)
@@ -42,7 +48,10 @@ class TaskModel {
       peopleNeeded = json['people_needed'],
       assignedBy = json['assigned_by'],
       status = json['status'],
-      created_at = json['created_at'];
+      created_at = json['created_at'],
+      task_due_at = json['task_due_at'],
+      personnel_count = json['personnel_count'],
+      nosuccess_detail = json['nosuccess_detail'];
 }
 
 class ReportModel {
@@ -127,6 +136,9 @@ StatusInfo getStatus(TaskModel task) {
       statusName = "ส่งงานเมื่อ";
       color = Colors.lightBlue;
       break;
+    case 'ต้องการแก้ไข':
+      statusName = "สั่งแก้งานเมื่อ";
+      color = Colors.deepOrangeAccent;
     default:
       statusName = "";
       color = Colors.grey;
@@ -158,8 +170,10 @@ String getFormatDate(String dateData) {
   final porSorYear = date.year + 543;
   final day = date.day;
   final month = thaiMonth[date.month];
+  final hour = date.hour.toString().padLeft(2, '0');
+  final minute = date.minute.toString().padLeft(2, '0');
 
-  return '$day $month $porSorYear';
+  return '$day $month $porSorYear เวลา $hour:$minuteน.';
 }
 
 class AppDrawer extends StatefulWidget {
@@ -204,8 +218,8 @@ class _AppDrawerState extends State<AppDrawer> {
 
           if (role != "1") ...[
             ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text("หน้าหลัก"),
+              leading: const Icon(Icons.assignment),
+              title: const Text("รายการงานที่เข้าร่วมได้"),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
@@ -230,8 +244,8 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.work),
-              title: const Text("แจ้งปัญหา"),
+              leading: const Icon(Icons.help_center),
+              title: const Text("แจ้งเหตุสร้างงาน"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -245,8 +259,8 @@ class _AppDrawerState extends State<AppDrawer> {
 
           if (role == "1") ...[
             ListTile(
-              leading: const Icon(Icons.work),
-              title: const Text("หน้าหลัก"),
+              leading: const Icon(Icons.assignment),
+              title: const Text("รายการงานทั้งหมด"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -272,7 +286,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.add),
+              leading: const Icon(Icons.note_add),
               title: const Text("เพิ่มงาน"),
               onTap: () {
                 Navigator.push(
@@ -285,7 +299,7 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.warning),
+              leading: const Icon(Icons.help_center),
               title: const Text("รายการแจ้งเหตุสร้างงาน"),
               onTap: () {
                 Navigator.push(

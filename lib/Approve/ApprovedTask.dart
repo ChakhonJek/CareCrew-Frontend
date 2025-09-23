@@ -14,6 +14,7 @@ class ApproveTaskPage extends StatefulWidget {
 
 class _ApproveTaskPageState extends State<ApproveTaskPage> {
   List<TaskModel> tasks = [];
+  String selectedStatus = "งานทั้งหมด";
 
   Future<List<TaskModel>> getData() async {
     final res = await http.get(Uri.parse('https://api.lcadv.online/api/Tasks'));
@@ -56,8 +57,9 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 5),
-            Text("จำนวนคนที่ต้องการ: ${task.peopleNeeded}"),
+            Text("จำนวนคนที่ต้องการ: ${task.personnel_count}/${task.peopleNeeded}คน"),
             Text("มอบหมายงานโดย: ${task.assignedBy}"),
+            Text("กำหนดส่งงาน: ${getFormatDate(task.task_due_at)}"),
             SizedBox(height: 5),
             Chip(
               avatar: Icon(Icons.circle, size: 14, color: status.color),
@@ -80,10 +82,23 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> statusOptions = [
+      "งานทั้งหมด",
+      "ยังไม่ดำเนินการ",
+      "อยู่ระหว่างดำเนินการ",
+      "รอการตรวจสอบ",
+      "ต้องการแก้ไข",
+      "เสร็จสิ้น"
+    ];
+
+    List<TaskModel> filteredTasks = selectedStatus == "งานทั้งหมด"
+        ? tasks
+        : tasks.where((t) => t.status == selectedStatus).toList();
+
     return Scaffold(
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
-        title: Text("รายการงาน"),
+        title: Text("รายการงานทั้งหมด"),
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -91,28 +106,56 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
           ),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: loadTasks,
-        child: tasks.isEmpty
-            ? ListView(
+      body: Column(
+        children: [
+          // ChoiceChip
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.all(8),
+            child: Row(
+              children: statusOptions.map((status) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ChoiceChip(
+                    label: Text(status),
+                    selected: selectedStatus == status,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedStatus = status;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: loadTasks,
+              child: filteredTasks.isEmpty
+                  ? ListView(
                 physics: AlwaysScrollableScrollPhysics(),
                 children: [
                   SizedBox(height: 300),
                   Center(
                     child: Text(
-                      "ยังไม่มีงานให้ตรวจสอบ",
+                      "ไม่พบงานสถานะดังกล่าว",
                       style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
                   ),
                 ],
               )
-            : ListView.builder(
+                  : ListView.builder(
                 physics: AlwaysScrollableScrollPhysics(),
-                itemCount: tasks.length,
+                itemCount: filteredTasks.length,
                 itemBuilder: (context, i) {
-                  return taskList(tasks[i]);
+                  return taskList(filteredTasks[i]);
                 },
               ),
+            ),
+          ),
+        ],
       ),
     );
   }

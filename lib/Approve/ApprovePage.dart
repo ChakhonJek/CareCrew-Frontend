@@ -63,8 +63,9 @@ class _ApprovePageState extends State<ApprovePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 5),
-            Text("จำนวนคนที่ต้องการ: ${task.peopleNeeded}"),
+            Text("จำนวนคนที่ต้องการ: ${task.personnel_count}/${task.peopleNeeded}คน"),
             Text("มอบหมายงานโดย: ${task.assignedBy}"),
+            Text("กำหนดส่งงาน: ${getFormatDate(task.task_due_at)}"),
             SizedBox(height: 5),
             Chip(
               avatar: Icon(Icons.circle, size: 14, color: status.color),
