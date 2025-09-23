@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/fcm_service.dart';
+import 'package:myjek/local_notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myjek/Login/HomePage.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LocalNotification();
   await FcmService.init();
-  runApp(const MyApp());}
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
 
     if (personelID != null && role != null) {
       if (role == "1") {
-        return ApproveTaskPage(personelID: personelID,);
+        return ApproveTaskPage(personelID: personelID);
       } else {
         return DashboardPage(personelID: personelID);
       }
@@ -28,7 +31,6 @@ class MyApp extends StatelessWidget {
       return const HomePage();
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
