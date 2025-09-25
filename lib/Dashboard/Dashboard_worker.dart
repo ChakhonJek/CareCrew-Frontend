@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Dashboard/Info.dart';
-import 'package:myjek/NotificationWidget.dart';
+import 'package:myjek/NotificationBell.dart';
 import 'Models.dart';
 import 'dart:convert';
 
@@ -26,14 +26,17 @@ class _DashboardPageState extends State<DashboardPage> {
   bool isLoading = true;
 
   Future<void> mapTaskData() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
+
     try {
       final resPerson = await http.get(Uri.parse('https://api.lcadv.online/api/perlrubTasks'));
       final resTask = await http.get(Uri.parse('https://api.lcadv.online/api/Tasks'));
       final resParticipants = await http.get(Uri.parse('https://api.lcadv.online/api/lrubTasks'));
 
+      if (!mounted) return;
       if (resTask.statusCode != 200) {
         setState(() {
           tasks = [];
@@ -45,6 +48,7 @@ class _DashboardPageState extends State<DashboardPage> {
       final resTaskJson = jsonDecode(utf8.decode(resTask.bodyBytes));
       final allTasks = resTaskJson.map<TaskModel>((data) => TaskModel.fromJson(data)).toList();
 
+      if (!mounted) return;
       if (resPerson.statusCode != 200 || resParticipants.statusCode != 200) {
         setState(() {
           tasks = allTasks;
@@ -55,6 +59,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
       final String participantsBody = utf8.decode(resParticipants.bodyBytes);
       if (participantsBody.isEmpty || participantsBody == 'null') {
+        if (!mounted) return;
         setState(() {
           tasks = allTasks;
           isLoading = false;
@@ -71,7 +76,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
       for (var task in allTasks) {
         final match = allParticipants.firstWhere(
-          (p) => p.taskId == task.taskId,
+              (p) => p.taskId == task.taskId,
           orElse: () => TaskParticipants(
             taskId: task.taskId,
             personnelName: '',
@@ -86,18 +91,21 @@ class _DashboardPageState extends State<DashboardPage> {
         }
       }
 
+      if (!mounted) return;
       setState(() {
         tasks = filteredTasks;
         isLoading = false;
       });
     } catch (e) {
       print("Error: $e");
+      if (!mounted) return;
       setState(() {
         tasks = [];
         isLoading = false;
       });
     }
   }
+
 
   Widget taskList(TaskModel task) {
     final status = getStatus(task);
@@ -148,9 +156,9 @@ class _DashboardPageState extends State<DashboardPage> {
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("รายการงานที่เข้าร่วมได้"),
-        // actions: [
-        //   NotificationBell(),
-        // ],
+         actions: [
+           NotificationBell(personnelId: int.parse(widget.personelID)),
+         ],
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -183,27 +191,30 @@ class _DashboardPageState extends State<DashboardPage> {
 
           Expanded(
             child: RefreshIndicator(
-              onRefresh: mapTaskData,
+              onRefresh: () async {
+                await mapTaskData();
+                await NotificationBell.refreshNotifications();
+              },
               child: filteredTasks.isEmpty
                   ? ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      children: [
-                        SizedBox(height: 300),
-                        Center(
-                          child: Text(
-                            "ไม่พบงานสถานะดังกล่าว",
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      itemCount: filteredTasks.length,
-                      itemBuilder: (context, i) {
-                        return taskList(filteredTasks[i]);
-                      },
+                physics: AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: 300),
+                  Center(
+                    child: Text(
+                      "ไม่พบงานสถานะดังกล่าว",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
+                  ),
+                ],
+              )
+                  : ListView.builder(
+                physics: AlwaysScrollableScrollPhysics(),
+                itemCount: filteredTasks.length,
+                itemBuilder: (context, i) {
+                  return taskList(filteredTasks[i]);
+                },
+              ),
             ),
           ),
         ],

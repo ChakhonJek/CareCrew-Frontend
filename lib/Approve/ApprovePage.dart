@@ -4,6 +4,8 @@ import 'package:myjek/Approve/ApprovedInfoChecking.dart';
 import 'package:myjek/Dashboard/Models.dart';
 import 'dart:convert';
 
+import 'package:myjek/NotificationBell.dart';
+
 class ApprovePage extends StatefulWidget {
   final String personelID;
   const ApprovePage({super.key, required this.personelID});
@@ -92,6 +94,9 @@ class _ApprovePageState extends State<ApprovePage> {
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("ตรวจสอบงาน"),
+        actions: [
+          NotificationBell(personnelId: int.parse(widget.personelID)),
+        ],
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),

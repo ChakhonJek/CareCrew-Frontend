@@ -5,6 +5,7 @@ import 'package:myjek/Approve_function/AddmoreTask.dart';
 import 'package:myjek/Approve_function/TaskFromReport.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'package:myjek/Dashboard/Profile.dart';
+import 'package:myjek/Dashboard/mainpage.dart';
 import 'package:myjek/Login/LoginPage.dart';
 import 'package:myjek/Report_Problem/ReportPage.dart';
 import 'Working.dart';
@@ -36,7 +37,7 @@ class TaskModel {
     required this.created_at,
     required this.task_due_at,
     required this.personnel_count,
-    this.nosuccess_detail
+    this.nosuccess_detail,
   });
 
   TaskModel.fromJson(Map<String, dynamic> json)
@@ -123,16 +124,14 @@ class TaskEvidence {
   });
 
   TaskEvidence.fromJson(Map<String, dynamic> json)
-      : assignedBy = json['assigned_by'] ?? '',
-        assignmentId = json['assignment_id'] ?? 0,
-        detail = json['detail'] ?? '',
-        files = List<String>.from(json['files'] ?? []),
-        taskId = json['task_id'] ?? 0,
-        title = json['title'] ?? '',
-        uploadedAt = json['uploaded_at'] ?? '';
+    : assignedBy = json['assigned_by'] ?? '',
+      assignmentId = json['assignment_id'] ?? 0,
+      detail = json['detail'] ?? '',
+      files = List<String>.from(json['files'] ?? []),
+      taskId = json['task_id'] ?? 0,
+      title = json['title'] ?? '',
+      uploadedAt = json['uploaded_at'] ?? '';
 }
-
-
 
 class Session {
   static String role = "";
@@ -245,6 +244,16 @@ class _AppDrawerState extends State<AppDrawer> {
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.blue),
             child: Text("เมนู", style: const TextStyle(color: Colors.white, fontSize: 20)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text("หน้าหลัก"),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => Mainpage(personelID: widget.personnelId)),
+              );
+            },
           ),
 
           if (role != "1") ...[

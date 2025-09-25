@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:myjek/Dashboard/Info.dart';
+import 'package:myjek/NotificationBell.dart';
 import 'Models.dart';
 import 'dart:convert';
 
@@ -116,7 +117,7 @@ class _MyWorkTask extends State<MyWorkTask> {
       "งานทั้งหมด",
       "อยู่ระหว่างดำเนินการ",
       "ต้องการแก้ไข",
-      "เสร็จสิ้น"
+      "เสร็จสิ้น",
     ];
 
     List<TaskModel> filteredTasks = selectedStatus == "งานทั้งหมด"
@@ -124,9 +125,10 @@ class _MyWorkTask extends State<MyWorkTask> {
         : tasks.where((t) => t.status == selectedStatus).toList();
 
     return Scaffold(
-      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("งานของฉัน"),
+        actions: [NotificationBell(personnelId: int.parse(widget.personelID))],
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -136,7 +138,6 @@ class _MyWorkTask extends State<MyWorkTask> {
       ),
       body: Column(
         children: [
-          // ChoiceChip
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.all(8),
@@ -163,24 +164,24 @@ class _MyWorkTask extends State<MyWorkTask> {
               onRefresh: mapTaskData,
               child: filteredTasks.isEmpty
                   ? ListView(
-                physics: AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: 300),
-                  Center(
-                    child: Text(
-                      "ไม่พบงานสถานะดังกล่าว",
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              )
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: 300),
+                        Center(
+                          child: Text(
+                            "ไม่พบงานสถานะดังกล่าว",
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    )
                   : ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: filteredTasks.length,
-                itemBuilder: (context, i) {
-                  return taskList(filteredTasks[i]);
-                },
-              ),
+                      physics: AlwaysScrollableScrollPhysics(),
+                      itemCount: filteredTasks.length,
+                      itemBuilder: (context, i) {
+                        return taskList(filteredTasks[i]);
+                      },
+                    ),
             ),
           ),
         ],
