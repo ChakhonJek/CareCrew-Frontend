@@ -202,7 +202,7 @@ class _MainpageState extends State<Mainpage> {
                           }),
                         ]
                       : [
-                          MenuOption(Icons.assignment, "รายการงานที่เข้าร่วมได้", () {
+                          MenuOption(Icons.assignment, "รายการงาน\nที่เข้าร่วมได้", () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
