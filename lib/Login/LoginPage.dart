@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:myjek/Approve/ApprovedTask.dart';
 import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'package:myjek/Dashboard/Models.dart';
+import 'package:myjek/Dashboard/mainpage.dart';
 import 'package:myjek/Login/HomePage.dart';
 import 'package:myjek/fcm_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,19 +56,11 @@ class _PageState extends State<LoginPage> {
         await prefs.setString('role', role);
         Session.role = role;
 
-        if (role == "1") {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => ApproveTaskPage(personelID: personelID)),
-            (Route<dynamic> route) => false,
-          );
-        } else {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => DashboardPage(personelID: personelID)),
-            (Route<dynamic> route) => false,
-          );
-        }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Mainpage(personelID: int.parse(personelID))),
+          (Route<dynamic> route) => false,
+        );
       } else {
         showError(message);
       }

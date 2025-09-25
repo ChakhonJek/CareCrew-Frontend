@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myjek/Dashboard/mainpage.dart';
 import 'package:myjek/fcm_service.dart';
 import 'package:myjek/local_notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,11 +23,7 @@ class MyApp extends StatelessWidget {
     final role = prefs.getString('role');
 
     if (personelID != null && role != null) {
-      if (role == "1") {
-        return ApproveTaskPage(personelID: personelID);
-      } else {
-        return DashboardPage(personelID: personelID);
-      }
+      return Mainpage(personelID: int.parse(personelID));
     } else {
       return const HomePage();
     }
