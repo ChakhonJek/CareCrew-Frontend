@@ -101,6 +101,8 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("รายการงานทั้งหมด"),
+        backgroundColor: Colors.lightBlue,
+        elevation: 2,
         actions: [
           NotificationBell(personnelId: int.parse(widget.personelID)),
         ],

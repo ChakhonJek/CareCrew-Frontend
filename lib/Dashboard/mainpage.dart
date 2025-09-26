@@ -182,7 +182,7 @@ class _MainpageState extends State<Mainpage> {
                               ),
                             );
                           }),
-                          MenuOption(Icons.help_center, "รายการแจ้งเหตุสร้างงาน", () {
+                          MenuOption(Icons.help_center, "รายการแจ้ง\nเหตุสร้างงาน", () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(

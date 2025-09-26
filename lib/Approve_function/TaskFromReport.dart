@@ -14,7 +14,6 @@ class Taskfromreport extends StatefulWidget {
 }
 
 class _TaskfromreportState extends State<Taskfromreport> {
-  
   @override
   void initState() {
     super.initState();
@@ -74,7 +73,11 @@ class _TaskfromreportState extends State<Taskfromreport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("รายการแจ้งเหตุสร้างงาน")),
+      appBar: AppBar(
+        title: const Text("รายการแจ้งเหตุสร้างงาน"),
+        backgroundColor: Colors.lightBlue,
+        elevation: 2,
+      ),
       drawer: AppDrawer(personnelId: widget.personnelId),
       body: RefreshIndicator(
         onRefresh: refreshData,

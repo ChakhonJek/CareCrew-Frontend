@@ -53,10 +53,7 @@ class _NotificationPageState extends State<NotificationPage> {
       await http.post(
         Uri.parse('https://api.lcadv.online/api/readnotis'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "noti_id": notiId,
-          "personnel_id": widget.personnelId,
-        }),
+        body: jsonEncode({"noti_id": notiId, "personnel_id": widget.personnelId}),
       );
       fetchNotifications();
     } catch (e) {
@@ -67,55 +64,52 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("แจ้งเตือน")),
+      appBar: AppBar(title: Text("แจ้งเตือน"), backgroundColor: Colors.lightBlue, elevation: 2),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : notifications.isEmpty
           ? Center(
-        child: Text(
-          "ไม่พบแจ้งเตือน",
-          style: TextStyle(fontSize: 18, color: Colors.grey),
-        ),
-      )
+              child: Text("ไม่พบแจ้งเตือน", style: TextStyle(fontSize: 18, color: Colors.grey)),
+            )
           : RefreshIndicator(
-        onRefresh: fetchNotifications,
-        child: ListView.builder(
-          itemCount: notifications.length,
-          itemBuilder: (context, index) {
-            final noti = notifications[index];
-            final isNew = noti['read'] == false;
+              onRefresh: fetchNotifications,
+              child: ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final noti = notifications[index];
+                  final isNew = noti['read'] == false;
 
-            return Card(
-              color: isNew ? Colors.blue[50] : Colors.grey[100],
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                title: Text(
-                  "${noti['title']}${isNew ? " (ใหม่)" : ""}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isNew ? Colors.red : Colors.grey[800],
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 4),
-                    Text(noti['body']),
-                    SizedBox(height: 4),
-                    Text(
-                      getFormatDate(noti['created_at']),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  return Card(
+                    color: isNew ? Colors.blue[50] : Colors.grey[100],
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        "${noti['title']}${isNew ? " (ใหม่)" : ""}",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isNew ? Colors.red : Colors.grey[800],
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4),
+                          Text(noti['body']),
+                          SizedBox(height: 4),
+                          Text(
+                            getFormatDate(noti['created_at']),
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                      onTap: () {
+                        if (isNew) markAsRead(noti['noti_id']);
+                      },
                     ),
-                  ],
-                ),
-                onTap: () {
-                  if (isNew) markAsRead(noti['noti_id']);
+                  );
                 },
               ),
-            );
-          },
-        ),
-      ),
+            ),
     );
   }
 }
