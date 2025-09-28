@@ -31,37 +31,36 @@ class _AfterAccept extends State<AfterAccept> {
   final picker = ImagePicker();
 
   @override
-void initState() {
-  super.initState();
-  if (widget.isEditMode) {
-    loadExistingEvidence();
+  void initState() {
+    super.initState();
+    if (widget.isEditMode) {
+      loadExistingEvidence();
+    }
   }
-}
 
-Future<void> loadExistingEvidence() async {
-  setState(() => loading = true);
-  try {
-    final evidences = await fetchTaskEvidence(widget.task.taskId);
-    setState(() {
-      existingImages = evidences.expand((e) => e.files).toList();
-    });
-  } catch (e) {
-    print("โหลดหลักฐานเดิมไม่สำเร็จ: $e");
-  } finally {
-    setState(() => loading = false);
+  Future<void> loadExistingEvidence() async {
+    setState(() => loading = true);
+    try {
+      final evidences = await fetchTaskEvidence(widget.task.taskId);
+      setState(() {
+        existingImages = evidences.expand((e) => e.files).toList();
+      });
+    } catch (e) {
+      print("โหลดหลักฐานเดิมไม่สำเร็จ: $e");
+    } finally {
+      setState(() => loading = false);
+    }
   }
-}
 
-Future<List<TaskEvidence>> fetchTaskEvidence(int taskId) async {
-  final res = await http.get(Uri.parse("https://api.lcadv.online/api/gettaskevidence/$taskId"));
-  if (res.statusCode == 200) {
-    final List<dynamic> data = jsonDecode(res.body);
-    return data.map((e) => TaskEvidence.fromJson(e)).toList();
-  } else {
-    throw Exception("โหลดข้อมูลงานไม่สำเร็จ: ${res.statusCode}");
+  Future<List<TaskEvidence>> fetchTaskEvidence(int taskId) async {
+    final res = await http.get(Uri.parse("https://api.lcadv.online/api/gettaskevidence/$taskId"));
+    if (res.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(res.body);
+      return data.map((e) => TaskEvidence.fromJson(e)).toList();
+    } else {
+      throw Exception("โหลดข้อมูลงานไม่สำเร็จ: ${res.statusCode}");
+    }
   }
-}
-
 
   Future<void> pickFromCamera() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
@@ -83,11 +82,12 @@ Future<List<TaskEvidence>> fetchTaskEvidence(int taskId) async {
 
   Future<void> sendReport() async {
     var uri = Uri.parse('https://api.lcadv.online/api/songtask');
-
     var request = http.MultipartRequest('POST', uri);
+
     request.fields['personnel_id'] = widget.personelID;
     request.fields['task_id'] = widget.task.taskId.toString();
 
+    // 🔹 แนบรูปที่เลือก/ถ่ายใหม่
     for (var imageFile in newImages) {
       String typee = '';
       if (imageFile.path.endsWith('.png'))
@@ -106,7 +106,26 @@ Future<List<TaskEvidence>> fetchTaskEvidence(int taskId) async {
       );
     }
 
-    request.fields['existing'] = jsonEncode(existingImages);
+    // 🔹 แนบรูปที่มีอยู่แล้ว (โหลดจาก URL มาใหม่แล้วอัปไปด้วย)
+    for (var url in existingImages) {
+      try {
+        final res = await http.get(Uri.parse(url));
+        if (res.statusCode == 200) {
+          final bytes = res.bodyBytes;
+          final fileName = url.split('/').last;
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'img',
+              bytes,
+              filename: fileName,
+              contentType: MediaType('image', fileName.endsWith('.png') ? 'png' : 'jpeg'),
+            ),
+          );
+        }
+      } catch (e) {
+        print("โหลดรูปจาก $url ไม่สำเร็จ: $e");
+      }
+    }
 
     var streamedResponse = await request.send();
     var responseBody = await streamedResponse.stream.bytesToString();

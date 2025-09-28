@@ -204,6 +204,8 @@ class _ReportPageState extends State<ReportPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("แจ้งเหตุสร้างงาน"),
+        backgroundColor: Colors.lightBlue,
+        elevation: 2,
         centerTitle: true,
         automaticallyImplyLeading: true,
       ),

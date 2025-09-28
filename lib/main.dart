@@ -4,8 +4,6 @@ import 'package:myjek/fcm_service.dart';
 import 'package:myjek/local_notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myjek/Login/HomePage.dart';
-import 'package:myjek/Dashboard/Dashboard_worker.dart';
-import 'package:myjek/Approve/ApprovedTask.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
