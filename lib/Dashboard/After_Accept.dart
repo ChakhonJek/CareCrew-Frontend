@@ -97,7 +97,6 @@ class _AfterAccept extends State<AfterAccept> {
     request.fields['personnel_id'] = widget.personelID;
     request.fields['task_id'] = widget.task.taskId.toString();
 
-    // รูปที่เลือก/ถ่ายใหม่
     for (var imageFile in newImages) {
       String typee = '';
       if (imageFile.path.endsWith('.png'))
