@@ -121,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text("PROFILE PHOTO", style: TextStyle(color: Colors.grey)),
                 ),
                 const SizedBox(height: 20),
-                buildProfileItem("รหัส: ", profileData!['personnel_id'] ?? "-"),
+                buildProfileItem("รหัส: ", profileData!['personnel_id']?.toString() ?? "-"),
                 buildProfileItem(
                   "ชื่อ: ",
                   "${profileData!['first_name']} ${profileData!['last_name']}",
