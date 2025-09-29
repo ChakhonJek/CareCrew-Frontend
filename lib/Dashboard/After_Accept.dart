@@ -42,9 +42,19 @@ class _AfterAccept extends State<AfterAccept> {
     setState(() => loading = true);
     try {
       final evidences = await fetchTaskEvidence(widget.task.taskId);
+
+      final myEvidences = evidences.where(
+            (e) => e.assignedId == int.parse(widget.personelID),
+      ).toList();
+
       setState(() {
-        existingImages = evidences.expand((e) => e.files).toList();
+        existingImages = myEvidences.expand((e) => e.files).toList();
       });
+
+      // for (var e in evidences) {
+      //   print("assignedId: ${e.assignedId}, files: ${e.files}");
+      // }
+
     } catch (e) {
       print("โหลดหลักฐานเดิมไม่สำเร็จ: $e");
     } finally {
@@ -87,7 +97,7 @@ class _AfterAccept extends State<AfterAccept> {
     request.fields['personnel_id'] = widget.personelID;
     request.fields['task_id'] = widget.task.taskId.toString();
 
-    // 🔹 แนบรูปที่เลือก/ถ่ายใหม่
+    // รูปที่เลือก/ถ่ายใหม่
     for (var imageFile in newImages) {
       String typee = '';
       if (imageFile.path.endsWith('.png'))
@@ -106,7 +116,7 @@ class _AfterAccept extends State<AfterAccept> {
       );
     }
 
-    // 🔹 แนบรูปที่มีอยู่แล้ว (โหลดจาก URL มาใหม่แล้วอัปไปด้วย)
+    // รูปที่มีอยู่แล้ว (โหลดจาก URL มาใหม่แล้วอัปไปด้วย)
     for (var url in existingImages) {
       try {
         final res = await http.get(Uri.parse(url));

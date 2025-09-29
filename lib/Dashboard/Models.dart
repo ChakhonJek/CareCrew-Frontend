@@ -107,6 +107,7 @@ class TaskParticipants {
 class TaskEvidence {
   final String assignedBy;
   final int assignmentId;
+  final int assignedId;
   final String detail;
   final List<String> files;
   final int taskId;
@@ -116,6 +117,7 @@ class TaskEvidence {
   TaskEvidence({
     required this.assignedBy,
     required this.assignmentId,
+    required this.assignedId,
     required this.detail,
     required this.files,
     required this.taskId,
@@ -126,6 +128,7 @@ class TaskEvidence {
   TaskEvidence.fromJson(Map<String, dynamic> json)
     : assignedBy = json['assigned_by'] ?? '',
       assignmentId = json['assignment_id'] ?? 0,
+      assignedId = json['assigned_id'] ?? 0,
       detail = json['detail'] ?? '',
       files = List<String>.from(json['files'] ?? []),
       taskId = json['task_id'] ?? 0,

@@ -43,7 +43,7 @@ class _NotificationBellState extends State<NotificationBell> {
         });
       }
     } catch (e) {
-      print("Error fetching notifications: $e");
+      print("แตกกกกกกกกกกกกกกกกกกกกกก: $e");
     }
   }
 

@@ -39,7 +39,7 @@ class _NotificationPageState extends State<NotificationPage> {
         });
       }
     } catch (e) {
-      print("Error fetching notifications: $e");
+      print("แตกกกกกกกกกกกกกกกกกกกกกก: $e");
       if (!mounted) return;
       setState(() {
         notifications = [];
@@ -57,7 +57,7 @@ class _NotificationPageState extends State<NotificationPage> {
       );
       fetchNotifications();
     } catch (e) {
-      print("Error marking notification as read: $e");
+      print("แตกกกกกกกกกกกกกกกกกกกกกก: $e");
     }
   }
 
