@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myjek/Approve/After_ApprovedTask.dart';
 import 'package:myjek/Dashboard/After_Accept.dart';
-import 'package:myjek/Dashboard/Dashboard_worker.dart';
 import 'Models.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -214,11 +213,7 @@ class _InfoState extends State<Info> {
         title: Text("รายละเอียดงาน"),
         leading: IconButton(
           onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => DashboardPage(personelID: widget.personelID)),
-              (route) => false,
-            );
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back),
         ),
@@ -238,7 +233,11 @@ class _InfoState extends State<Info> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(task.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 4),
+                  SizedBox(height: 2),
+                  Row(children: [
+                    Text("สถานะงาน: " , style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(task.status),
+                  ],),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -246,11 +245,10 @@ class _InfoState extends State<Info> {
                         'เวลาลงงาน ${getFormatDate(task.created_at)}',
                         style: TextStyle(fontSize: 12),
                       ),
-                      Text(task.status, style: TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
                   Divider(height: 20, thickness: 1),
-                  detail('หัวข้องาน', task.title),
+                  detail('หัวข้องาน:', task.title),
                   detail('หมายเลขงาน:', task.taskId.toString().padLeft(6, '0')),
                   detail('ผู้มอบหมายงาน:', task.assignedBy),
                   detail('ประเภทงาน:', task.typeName),
