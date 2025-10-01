@@ -27,7 +27,7 @@ class LocalNotification {
       importance: inForeground ? Importance.low : Importance.max,
       priority: inForeground ? Priority.low : Priority.high,
       playSound: !inForeground,
-      icon: 'carecrew',
+      icon: '@mipmap/ic_launcher',
     );
 
     final details =
