@@ -234,10 +234,12 @@ class _InfoState extends State<Info> {
                 children: [
                   Text(task.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   SizedBox(height: 2),
-                  Row(children: [
-                    Text("สถานะงาน: " , style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(task.status),
-                  ],),
+                  Row(
+                    children: [
+                      Text("สถานะงาน: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(task.status),
+                    ],
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -327,14 +329,17 @@ class _InfoState extends State<Info> {
                       }
                     },
                     onGoToSubmit: () async {
-                      await Navigator.push(
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (_) => AfterAccept(personelID: widget.personelID, task: task),
                         ),
                       );
-                      await submitStatus();
-                      setState(() {});
+
+                      if (result == true) {
+                        await submitStatus();
+                        setState(() {});
+                      }
                     },
                     onUnSubmit: () async {
                       final confirm = await showDialog<bool>(
@@ -362,7 +367,7 @@ class _InfoState extends State<Info> {
                       }
                     },
                     onViewEvidence: () async {
-                      await Navigator.push(
+                      final result = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
                           builder: (_) => AfterAccept(
@@ -372,8 +377,11 @@ class _InfoState extends State<Info> {
                           ),
                         ),
                       );
-                      await submitStatus();
-                      setState(() {});
+
+                      if (result == true) {
+                        await submitStatus();
+                        setState(() {});
+                      }
                     },
                   ),
                 ),

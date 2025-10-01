@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:myjek/Approve/ApprovePage.dart';
+import 'package:myjek/Approve/ApprovedInfoChecking.dart';
+import 'package:myjek/Dashboard/Info.dart';
 import 'dart:convert';
 
 import 'package:myjek/Dashboard/Models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationPage extends StatefulWidget {
   final int personnelId;
@@ -15,11 +19,55 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   List<Map<String, dynamic>> notifications = [];
   bool isLoading = true;
+  String role = "";
 
   @override
   void initState() {
     super.initState();
+    loadRole();
     fetchNotifications();
+  }
+
+  Future<void> loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedRole = prefs.getString('role') ?? "0";
+    if (!mounted) return;
+    setState(() {
+      role = savedRole;
+    });
+  }
+
+  Future<void> taptoinfo(Map<String, dynamic> noti) async {
+    try {
+      final taskId = int.parse(noti['data']['task_id']);
+      final res = await http.get(Uri.parse("https://api.lcadv.online/api/tasks/$taskId"));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        final task = TaskModel.fromJson(data);
+
+        if (role == "1") {
+    if (task.status == "รอการตรวจสอบ") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ApprovePage(personelID: widget.personnelId.toString())),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ApprovedCheckpage(task: task, personelID: widget.personnelId.toString())),
+      );
+    }
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => Info(task: task, personelID: widget.personnelId.toString())),
+    );
+  }
+      }
+    } catch (e) {
+      print("โหลด Task ไม่ได้: $e");
+    }
   }
 
   Future<void> fetchNotifications() async {
@@ -104,6 +152,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       ),
                       onTap: () {
                         if (isNew) markAsRead(noti['noti_id']);
+                        taptoinfo(noti);
                       },
                     ),
                   );

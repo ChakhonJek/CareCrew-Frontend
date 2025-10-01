@@ -43,18 +43,13 @@ class _AfterAccept extends State<AfterAccept> {
     try {
       final evidences = await fetchTaskEvidence(widget.task.taskId);
 
-      final myEvidences = evidences.where(
-            (e) => e.assignedId == int.parse(widget.personelID),
-      ).toList();
+      final myEvidences = evidences
+          .where((e) => e.assignedId == int.parse(widget.personelID))
+          .toList();
 
       setState(() {
         existingImages = myEvidences.expand((e) => e.files).toList();
       });
-
-      // for (var e in evidences) {
-      //   print("assignedId: ${e.assignedId}, files: ${e.files}");
-      // }
-
     } catch (e) {
       print("โหลดหลักฐานเดิมไม่สำเร็จ: $e");
     } finally {
@@ -115,7 +110,6 @@ class _AfterAccept extends State<AfterAccept> {
       );
     }
 
-    // รูปที่มีอยู่แล้ว (โหลดจาก URL มาใหม่แล้วอัปไปด้วย)
     for (var url in existingImages) {
       try {
         final res = await http.get(Uri.parse(url));
@@ -320,14 +314,8 @@ class _AfterAccept extends State<AfterAccept> {
                         actions: [
                           TextButton(
                             onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      Info(task: widget.task, personelID: widget.personelID),
-                                ),
-                                (route) => false,
-                              );
+                              Navigator.of(context).pop();
+                              Navigator.pop(context, true);
                             },
                             child: Text("ตกลง"),
                           ),
