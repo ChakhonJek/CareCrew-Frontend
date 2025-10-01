@@ -115,7 +115,6 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
       ),
       body: Column(
         children: [
-          // ChoiceChip
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.all(8),

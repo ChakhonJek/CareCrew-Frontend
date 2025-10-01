@@ -94,6 +94,8 @@ class _ApprovePageState extends State<ApprovePage> {
       drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       appBar: AppBar(
         title: Text("ตรวจสอบงาน"),
+        backgroundColor: Colors.lightBlue,
+        elevation: 2,
         actions: [
           NotificationBell(personnelId: int.parse(widget.personelID)),
         ],
