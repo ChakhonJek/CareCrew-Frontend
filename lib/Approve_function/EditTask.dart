@@ -127,8 +127,9 @@ class _EdittaskState extends State<Edittask> {
       Uri.parse('https://api.lcadv.online/api/removetask'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        "personnel_id": int.parse(widget.personelID)
-      , "task_id": widget.task.taskId}),
+        "personnel_id": int.parse(widget.personelID),
+        "task_id": widget.task.taskId,
+      }),
     );
   }
 
@@ -180,13 +181,7 @@ class _EdittaskState extends State<Edittask> {
                   ).showSnackBar(const SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")));
                 }
                 if (mounted) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ApproveTaskPage(personelID: widget.personelID),
-                    ),
-                    (route) => false,
-                  );
+                  Navigator.pop(context, true);
                 }
               }
             },

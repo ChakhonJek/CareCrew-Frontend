@@ -41,20 +41,11 @@ class CheckTaskPage extends StatelessWidget {
         content: TextField(
           controller: detailController,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: "รายละเอียด",
-            border: OutlineInputBorder(),
-          ),
+          decoration: const InputDecoration(labelText: "รายละเอียด", border: OutlineInputBorder()),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("ยกเลิก"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("ยืนยัน"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("ยกเลิก")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("ยืนยัน")),
         ],
       ),
     );
@@ -81,13 +72,12 @@ class CheckTaskPage extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pushAndRemoveUntil(
+                    Navigator.pop(context, true);
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ApproveTaskPage(personelID: personnelId.toString()),
+                        builder: (context) => ApproveTaskPage(personelID: personnelId.toString()),
                       ),
-                          (route) => false,
                     );
                   },
                   child: const Text("ตกลง"),
@@ -105,7 +95,7 @@ class CheckTaskPage extends StatelessWidget {
             title: const Text("เกิดข้อผิดพลาด"),
             content: Text(e.toString()),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("ปิด"))
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text("ปิด")),
             ],
           ),
         );
@@ -131,13 +121,8 @@ class CheckTaskPage extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ApproveTaskPage(personelID: personnelId.toString()),
-                    ),
-                    (route) => false,
-                  );
+                  Navigator.of(context).pop();
+                  Navigator.pop(context, true);
                 },
                 child: const Text("ตกลง"),
               ),
@@ -167,8 +152,6 @@ class CheckTaskPage extends StatelessWidget {
       );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

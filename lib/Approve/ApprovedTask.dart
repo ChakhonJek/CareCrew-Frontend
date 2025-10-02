@@ -70,13 +70,16 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
             ),
           ],
         ),
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ApprovedCheckpage(task: task, personelID: widget.personelID),
             ),
           );
+          if (result == true) {
+            loadTasks();
+          }
         },
       ),
     );
@@ -90,7 +93,7 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
       "อยู่ระหว่างดำเนินการ",
       "รอการตรวจสอบ",
       "ต้องการแก้ไข",
-      "เสร็จสิ้น"
+      "เสร็จสิ้น",
     ];
 
     List<TaskModel> filteredTasks = selectedStatus == "งานทั้งหมด"
@@ -103,9 +106,7 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
         title: Text("รายการงานทั้งหมด"),
         backgroundColor: Colors.lightBlue,
         elevation: 2,
-        actions: [
-          NotificationBell(personnelId: int.parse(widget.personelID)),
-        ],
+        actions: [NotificationBell(personnelId: int.parse(widget.personelID))],
         leading: Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.menu),
@@ -141,24 +142,24 @@ class _ApproveTaskPageState extends State<ApproveTaskPage> {
               onRefresh: loadTasks,
               child: filteredTasks.isEmpty
                   ? ListView(
-                physics: AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: 300),
-                  Center(
-                    child: Text(
-                      "ไม่พบงานสถานะดังกล่าว",
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              )
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: 300),
+                        Center(
+                          child: Text(
+                            "ไม่พบงานสถานะดังกล่าว",
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    )
                   : ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: filteredTasks.length,
-                itemBuilder: (context, i) {
-                  return taskList(filteredTasks[i]);
-                },
-              ),
+                      physics: AlwaysScrollableScrollPhysics(),
+                      itemCount: filteredTasks.length,
+                      itemBuilder: (context, i) {
+                        return taskList(filteredTasks[i]);
+                      },
+                    ),
             ),
           ),
         ],

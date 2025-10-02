@@ -51,7 +51,7 @@ class _ReportPageState extends State<ReportPage> {
     request.fields['personnel_id'] = widget.personelID;
     request.fields['detail'] = detail;
     request.fields['location'] = location;
-  for (var imageFile in selectedImages) {
+    for (var imageFile in selectedImages) {
       String Typee = '';
       if (imageFile.path.endsWith('.png')) {
         Typee = 'image/png';
@@ -63,14 +63,13 @@ class _ReportPageState extends State<ReportPage> {
         Typee = 'application/octet-stream';
       }
 
-      request.files.add(await http.MultipartFile.fromPath(
-        'img',
-        imageFile.path,
-        contentType: MediaType(
-          Typee.split('/')[0],
-          Typee.split('/')[1],
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'img',
+          imageFile.path,
+          contentType: MediaType(Typee.split('/')[0], Typee.split('/')[1]),
         ),
-      ));
+      );
     }
 
     var streamedResponse = await request.send();
@@ -93,6 +92,7 @@ class _ReportPageState extends State<ReportPage> {
       throw Exception(message);
     }
   }
+
   Widget imagePickerWidget() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -181,11 +181,10 @@ class _ReportPageState extends State<ReportPage> {
           content: Text("ข้อมูลถูกส่งเรียบร้อยแล้ว"),
           actions: [
             TextButton(
-              onPressed: (){Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => ReportPage(personelID: widget.personelID)),
-            (route) => false,
-          );},
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pop(context, true);
+              },
               child: Text("ตกลง"),
             ),
           ],
@@ -209,7 +208,7 @@ class _ReportPageState extends State<ReportPage> {
         centerTitle: true,
         automaticallyImplyLeading: true,
       ),
-      drawer: AppDrawer(personnelId: int.parse(widget.personelID),),
+      drawer: AppDrawer(personnelId: int.parse(widget.personelID)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

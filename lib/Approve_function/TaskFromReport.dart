@@ -58,13 +58,17 @@ class _TaskfromreportState extends State<Taskfromreport> {
             Text("วันที่: ${DateFormat('dd/MM/yyyy HH:mm').format(report.createdAt.toLocal())}"),
           ],
         ),
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ReportInfopage(reportModel: report, personnelid: widget.personnelId),
             ),
           );
+
+          if (result == true) {
+            refreshData();
+          }
         },
       ),
     );

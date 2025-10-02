@@ -16,9 +16,7 @@ class ReportInfopage extends StatelessWidget {
     final res = await http.post(
       Uri.parse('https://api.lcadv.online/api/removereport'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "personnel_id": personnelid,
-        "report_id": reportModel.reportId}),
+      body: jsonEncode({"personnel_id": personnelid, "report_id": reportModel.reportId}),
     );
   }
 
@@ -55,11 +53,7 @@ class ReportInfopage extends StatelessWidget {
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("ลบงานเรียบร้อยแล้ว")));
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => Taskfromreport(personnelId: personnelid)),
-                  (route) => false,
-                );
+                Navigator.pop(context, true);
               }
             },
           ),
