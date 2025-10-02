@@ -214,12 +214,6 @@ class _ReportPageState extends State<ReportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              height: 2,
-              width: double.infinity,
-              color: Colors.black,
-            ),
             SizedBox(height: 20),
             TitleField(onChanged: (val) => title = val),
             LocationField(onChanged: (val) => location = val),
