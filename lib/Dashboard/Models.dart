@@ -22,6 +22,7 @@ class TaskModel {
   String status;
   String created_at;
   String task_due_at;
+  String? completed_at;
   int personnel_count;
   String? nosuccess_detail;
 
@@ -36,6 +37,7 @@ class TaskModel {
     required this.status,
     required this.created_at,
     required this.task_due_at,
+    required this.completed_at,
     required this.personnel_count,
     this.nosuccess_detail,
   });
@@ -51,6 +53,7 @@ class TaskModel {
       status = json['status'],
       created_at = json['created_at'],
       task_due_at = json['task_due_at'],
+      completed_at = json['completed_at'],
       personnel_count = json['personnel_count'],
       nosuccess_detail = json['nosuccess_detail'];
 }

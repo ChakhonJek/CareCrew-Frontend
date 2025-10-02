@@ -90,7 +90,11 @@ class _MyWorkTask extends State<MyWorkTask> {
             SizedBox(height: 5),
             Text("จำนวนคนที่ต้องการ: ${task.personnel_count}/${task.peopleNeeded}คน"),
             Text("มอบหมายงานโดย: ${task.assignedBy}"),
-            Text("กำหนดส่งงาน: ${getFormatDate(task.task_due_at)}"),
+            if (task.status == "เสร็จสิ้น") ...[
+              Text("เสร็จสิ้นเมื่อ: ${getFormatDate(task.completed_at!)}"),
+            ] else ...[
+              Text("กำหนดส่งงาน: ${getFormatDate(task.task_due_at)}"),
+            ],
             SizedBox(height: 5),
             Chip(
               avatar: Icon(Icons.circle, size: 14, color: status.color),
